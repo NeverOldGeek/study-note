@@ -1,0 +1,256 @@
+杂记：查看数据库的隔离级别：select @@tx_isolation;
+      修改事务隔离级别：set transaction isolation level read uncommitted;
+
+1.数据库操作
+创建数据库
+	create database 库名
+	创建一个使用utf-8字符集，并带校对规则的mydb3
+		create database mydb3 character set utf8 collate utf8_general_ci;
+
+解决maven仓库删除问题
+cd %userprofile%\.m2\repository
+for /r %i in (*.lastUpdated) do del %i
+
+查看所有数据库名
+	show databases;
+显示库的创建信息
+	show create database mydb3;
+删除数据库
+	drop database 库名;
+修改数据库（只能修改创建数据库的详细信息，不能修改库名）
+	alter database mydb2 character set gb2312;
+备份数据库
+1.准备库的数据
+create database mydb1;
+use mydb1;
+create table test
+(
+	id int
+);
+insert into test(id) values(1);
+select * from test;
+2.备份库
+	2.1 mysqldump(Windows命令，要退出mysql客户端)
+	2.2 在Windows窗口下执行 mysqldump -u root -p mydb1>c:\test.sql
+3.删除库：
+	drop database mydb1;
+4.恢复库（1）
+	4.1 创建被删除的库：create database mydb1;
+	4.2 source c:\test.sql(通过执行脚本文件实现)
+  恢复库（2）：mysql -u root -p mydb1<c:\test.sql(Windows命令)
+
+
+二.常用的数据类型
+	length() 返回字符串所占的字节数（受编码影响）
+	char_length() 返回字符串中的字符数
+	参考MySQL.ppt上29页到51页
+	补充：TimeStamp（时间戳）
+		当将某一列设置为时间戳类型，这一列不用赋值，当对某一行插入或修
+		改时，时间戳这一列会自动记录进行操作时的时间
+
+
+
+	运算符
+	参考MySQL课件\MySQL.ppt上80页到85页
+
+
+三.表操作
+复制表：
+全部复制
+
+    create table stu2 as select * from stu ;
+
+部分复制
+
+    create table stu2 as select * from stu where id >3;
+
+不复制数据(复制表结构)：
+     create table stu3 as select * from stu where id <0  ;
+     create table stu4 like stu;
+
+插入数据：
+
+   insert into stuB select * from stu;
+1.创建表
+create table employee
+(
+	id int,
+	name varchar(20),
+	gender varchar(4),
+	birthday date,
+	job varchar(40),
+	salary double,
+	resume text
+)character set utf8 collate utf8_general_ci;
+
+	查看所有表
+	show tables;
+
+	查看表的创建细节
+	show create table 表名;
+
+	查看表结构
+	desc 表名;
+	show variables like 'chara%'；
+2.修改表
+	2.1往表中新增列,列名image 类型 blob（也可以新增约束）
+		alter table employee add image blob;
+	2.2修改列，使其类型长度改变
+		alter table employee modify job varchar(60);
+	2.3删除列
+		alter table employee drop 列名;
+	2.4修改表名
+		rename table employee to 新表名;
+		或 alter table employee rename as 新表名
+	2.5修改表的字符集
+		alter table 表名 character set gb2312;
+	2.6修改列的名字（也可以通过此语句改变列的数据类型和长度）
+		alter table user change column 旧列名 新列名 数据类型;
+3.删除表
+	drop table 表名;
+
+
+
+4.查询表
+	select查询时还可以计算表达式
+	过滤表中重复的数据
+		select distinct english from student;
+	在所有学生的英语分上加10分特长分
+		select name,(english+10) from student;
+	统计每个学生的总分
+		select name,(english+chinese+math) from student;
+	使用别名表示学生分数
+		select name as 姓名,(english+chinese+math) as 总分 from student;
+		(as可省略)select name 姓名,(english+chinese+math) 总分 from student;
+
+	参考sqlserver笔记
+
+4.杂记
+	通过命令行窗口插入失败解决方案
+	show variables like 'chara%';
+	set character_set_client=gb2312;
+
+	通过命令行窗口显示失败解决方案
+	set character_set_results=gb2312;
+
+	通过命令行写sql语句，可以先把语句写在一个.sql的脚本文件中
+	然后通过  source 路径名\文件名.sql;  的方式运行脚本文件
+
+	ifnull(exr1,exr2)如果exr1是null返回exr2，否则返回exr1
+	nullif(exr1,exr2)如果exr1和exr2相等返回null，否则返回exr1
+	isnull(exr1)如果exr1是null返回1，否则返回0
+
+
+
+
+事物保持两件及以上的一致性
+保存点：savepoint 保存点名称(a)
+回滚：rollback to savepoint a;
+1.函数
+	字符函数（函数名不区分大小写）
+		ascii(str)  返回字符串str 的最左字符的ASCII码数值 
+		char(n)  返回整数n所代表的字符（返回为一个包含这些整数的代码值所给出的字符的字符串 ）
+		char_length(str)  返回字符串str 的长度，长度的单位为字符 
+		instr(str,substr) 返回子字符串substr在字符串 str 中第一个出现位置（注：位置从一开始）
+		substring(str,pos,len) 返回从pos位置开始截取len长度的子串 （注：位置从一开始）
+		replace(str,from_str,to_str)  将字符串str中的子串from_str替换为字符串to_str
+		concat(str1,str2,...)  返回结果为连接参数（参数可以不是字符串）产生的字符串
+
+	数值函数
+		abs(x) 返回x（可以为算法表达式）的绝对值
+		ceil(x) 返回不小于x 的最小整数值
+		floor(x) 返回不大于x的最大整数值
+		round(x) 返回参数x, 其值接近于最近似的整数，也就是四舍五入
+		truncate(x,d) 返回被舍去至小数点后d位的数字x（即保留d位小数，直接丢掉d后面的小数）
+		rand() 返回一个范围在 0 到1 之间的随机浮点值 
+	
+	日期函数
+		按时间间隔计算新的日期
+			date_add(date,interval expr type);
+			date_sub(date,interval,expr type);
+
+			type有：MICROSECOND(微秒)，SECOND(秒)，MINUTE(分钟)，等
+			expr type：MICROSECONDS 后面都类似在原有类型上加S；
+	自定义函数：
+		create function 
+2.存储过程
+
+存储过程根据需要可能会有输入、输出、输入输出参数，如果有多个参数用","分割开。
+MySQL存储过程的参数用在存储过程的定义，共有三种参数类型,IN,OUT,INOUT:
+
+IN参数的值必须在调用存储过程时指定，在存储过程中修改该参数的值不能被返回，为默认值
+
+OUT:该值可在存储过程内部被改变，并可返回
+
+INOUT:调用时指定，并且可被改变和返回
+
+	1.定义结束标志（由于在定义存储过程时用到了分号代表语句结束，所以要重先定义创建存储过程结束的标志）
+		delimiter 自定义结束符（eg:?）
+	2.定义存储过程
+		create  procedure  过程名 (  
+		 [ [in | out| inout] 参数名  类型 ] [, 参数 … ]
+		)
+		begin
+		   语句
+		end;
+	3.调用存储过程
+		call 存储过程名（实参,@输出结果存放的参数名(eg:parte）
+			解释：通过call调用存储过程传入实参，将输出结果存入parte中
+	4.显示输出结果（有的存储过程没有这一步）
+		select @parte
+
+		存储过程例子1
+			delimiter ;;
+			create procedure test_procedure(out sum int)
+			begin
+			  declare i int default 1;
+ 			  set sum = 0;
+			  while i <= 100 do
+			  set sum = sum + i;
+			  set i = i + 1;
+			  end while;
+			end
+			;;
+			call test_procedure(@sum);;
+			select @sum;;
+
+		存储过程例子2
+			delimiter ??
+			create procedure test_procedure1(deptid int,out avgsal float)
+			begin
+			  select avg(salary) into avgsal from emp where did = deptid
+			end
+			??
+			call test_procedure1(1,@aa)??
+			select @aa ??
+
+3.触发器
+	创建触发器
+	create trigger 触发器名
+	before | after
+	insert | update | delete
+	on 表名
+	for each row
+	begin
+		语句
+	end
+
+	触发器例子：
+		delimiter ;;
+		create trigger trig_sal
+		before update on employee
+		for each row
+		begin
+		 if new.salary < 2000 then
+		    set new.salary = old.salary;
+		 end if;
+		end;;
+		update employee set salary = 1000 where id = 1;;
+
+	删除触发器
+	drop trigger 触发器名
+权限系统
+	参考MySQL数据库管理.ppt
+
+分页查询
+	limit 两个参数

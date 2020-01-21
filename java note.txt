@@ -1,0 +1,209 @@
+Ruby.railstutorial.org/
+
+java静态导入：就是像导包一样导入静态属性和方法
+java自动装箱和拆箱：可以将基本类型数据
+增强for循环：只能用来迭代数组和实现Itorable接口的集合，不能迭代map集合
+可变参数：声明方法时eg：void test（int ... args）{}这样写可以传递不定个数的参数
+	  内部将这些参数放到args数组中，要获取这些参数只需要迭代数组就行
+
+枚举：通过enum关键字可以声明一个枚举类，枚举的构造函数必须是私有的
+	eg: enum Grade{
+		A,B,C,D,E;//是一个Grade的实例对象
+	}
+	如何让枚举对象封装属性
+	eg:
+		enum Grade{
+			A("100-90"),B("89-80"),C("79-70"),D("69-60"),E("59-0");
+
+			private String value;
+			private Grade(String value){
+				this.value = value;
+			}
+			
+			public String getValue(){
+				return value;
+			}
+		}
+
+注：在一对括号里面定义的局部变量和对象，超出括号范围就不可用了
+1.类中的成员属性和方法要按需要的业务场景而定，当类中的属性和方法越详细
+  它就越接近一个对象
+2.打包package 命名规则 以倒叙格式eg:com.gangpu.demo dos命令 -d:打包
+  类被打包不能直接用类名，打包后用包名加类名（也叫类长名）-encoding utf-8
+构造方法：
+	一个类若在定义时没有声明，则在编译时会调用虚拟机上的默认方法
+	类生成对象的成员属性是私有的，类生成对象的成员方法是公有的
+
+方法重载：与方法返回值无关只与形参个数和形参类型有关
+	this();--调用前面的构造方法来附值，但必须是第一条语句，this的这种用法只能用在构造方法中
+	构造方可以可以被多次定义
+对象+消息驱动=程序
+java虚拟机有垃圾回收机制
+this默认指向当前对象的成员，当this用在构造方法中时，this（）语句必须是构造方法的第一条语句
+	
+封装：	
+	在子类的普通方法想调用父类中被重写的方法，可以通过super
+	在子类的构造方法中调用父类的构造方法用super必须放在子类构造方法的第一行
+	使用final修饰的方法不可被重写
+	使用final声明的类不能有子类
+	使用final修饰的变量不能被更改
+	凡是用static修饰的成员，在加载类时就分配内存，多个对象共享内存空间，存储在
+	static静态内存区，类变量既可以通过类名访问，也可以通过对象名访问，
+	static还可以修饰静态代码块eg：static{System.out.println（""）}
+	当类加载时优先执行静态代码块，静态成员只能访问静态成员不能访问非静态成员
+在做需求分析时：一切名词皆为对象，一切动词皆为方法
+
+package的使用：
+	1.package必须是第一条语句
+	2.类名将变为包名和类名的组合
+	3建议使用javac -d . 类名.java
+
+不同包之间的访问：
+        导入包用import，导报最好直接导到类名，最好不要*全导；
+	在原始包中不能加private和protected，只能用public和默认的
+
+	1.在同一个包内只有私有的成员不能被访问，同样也只有私有的类不能被继承
+	2.在两个不同的没有任何关系的包中，只有public类中的public成员可以被另
+	  一个包中的类访问
+	3.在两个不同的有继承关系的包内，只有public类可以被继承，只有public类中的
+	  public成员和protected成员可以被另一个包中的子类在内部使用，在子类外部通过类对象名形
+	  式只能访问public类中的public成员。
+	
+怎样构建jar包
+	新建一个文件夹，将要构建的几个包放到这个文件夹中，然后调用dos命令输入：jar cvf T.jar *
+
+Math 中ceil方法返回大于某个数的最小整数，floor返回小于某个数的最大整数，abs（）返回绝对值。。。。
+
+pattern类java过滤特殊字符的正则表达式有效数
+BigDecimal类处理超过十六位
+
+一个类只能继承一个类但可以实现多个接口，
+接口可以是多继承：一个接口可以继承多个接口；
+
+异常：
+1.硬件导致的的异常往往归为Error
+2.软件导致的异常
+	处理异常：try{
+	有可能出现的异常
+	}catch（异常类  异常对象）{
+	编写异常处理语句
+	}catch（异常类  异常对象）{
+	编写异常处理语句
+	}......
+	finally{
+	不管如何一定会执行的代码
+	}
+
+
+		非运行异常：编译时就会出错
+异常（throwable）
+		运行时异常分为Error和Exception需要catch运行时异常
+
+打印异常消息：printStackTrace（）；
+常用类（集合）ArrayList和HashMap和Vector
+Collection可以存放所有类型的对象是无序的可重复的，List存放所有类型对象是有序的可重复的（不允许存空）。
+						  set接口存放的是不可重复的无序的（可存空）
+所有集合都可以用迭代器迭代只需要调用iterator（）方法就可以得到迭代器。
+Collections类可以对实现Collenction接口的子类进行排序，倒置，查找等方法；用Collections的方法对自定
+	义的类的方法进行比较时，自定义类需要实现Compareable接口。
+ArrayList：（找java.util中的）
+	ArrayList是List接口的实现类
+	具有可伸缩性的特性
+	取值都是以object类型返回
+	通过泛型声明ArrayList中元素类型<>
+
+HashMap:
+	是以键-值的方式存放数据
+	key不允许重复
+	key，value允许为null
+	集合中存放的对象是无序的
+	
+IO：
+   计算机存储所有信息都是以文件的形式存储所有信息。
+	File类是java.IO包中唯一能够代表磁盘文件本身的对象。	
+
+
+流：四大抽象流：InputStream,OutputStream,Reader,Writer
+	缓冲流: BufferedInputstream,BufferedOutputStream，BufferedReader,BufferedWriter
+	数据流: DateInputStream,等等同上
+	转换流：InputStreamReader,OutputStreamWriter
+	print流
+	对象序列化：ObjectInputStream,ObjectOutputStream,关键字：serializable(被它修饰的成员不被序列化)
+	等等
+怎样获得类的加载器
+	对象.class.getClassLoader();
+	注意类加载器加载文件不宜过大，因为类加载器是直接将整个资源加载到内存中
+
+java字节码操作
+	1.通过javac将.java文件编译成字节码文件，在将字节码文件加载到内存中
+	可以通过javassist.jar工具包解决，可以向内存中已加载的类中添加新方法
+
+
+
+JVM运行和类加载全过程
+	类加载机制
+		JVM把class文件加载到内存中，并对数据进行验证，解析和初始化
+				加载-验证-准备-解析-初始化-使用-卸载
+			1.加载
+				将class文件字节码内容加载到内存中，并将这些静态数据转换成方法区中的运行
+				时数据结构，在堆中生成一个代表这个类的java.lang.class对象作为方法区中类数
+				据的访问入口，这个过程需要类加载器参与
+
+			2.链接：将java类的二进制代码合并到JVM的运行状态之中的过程
+				1.验证
+					确保加载的类信息符合JVM规范
+				2.准备
+					正式为类变量（static）分配内存并设置类变量初始值的过程，这些内存都将在方法区中进行分配
+				3.解析
+					
+					虚拟机常量池中的符号引用替换为直接引用的过程
+			3.初始化
+				初始化阶段是执行类构造器<clinit>()方法过程。类构造器方法是由编译器自动收集类中的所有类变量的赋值动作和
+				静态语句块（static块）中的语句合并产生的
+				
+				1.类的主动引用（一定会发生类的初始化）
+					1.new 一个类的对象
+					2.调用类的静态成员（除了final常量）和静态方法
+					3.使用java.lang.reflect包的方法对类进行反射调用
+					4.虚拟机调用的启动类一定会被初始化
+					5.当初始化一个类时，如果父类没有被初始化，则会先初始化他的父类
+
+				2.类的被动引用（不会发生类的初始化）
+					1.当访问一个静态域时，只有真正声明这个域的类才会被初始化
+					2.通过数组定义类的引用时，不会触发类的初始化
+					3.引用常量不会触发类的初始化
+
+
+
+
+动态代理：
+	Proxy类
+
+
+jdbc:
+1.注册驱动
+2.URL
+3.Driver
+4.编写sql语句
+prepareStatement优点
+1.提高效率
+2.防止sql注入
+
+java反射机制
+主要位于java.lang.reflect包中
+Class类
+Field类
+Method类
+Constructor类
+Array类
+
+
+	
+
+float型的表示，规格型，非规格型（exp全为0），特殊值（exp全为1，frac全为0：表示无穷）
+
+
+
+
+
+

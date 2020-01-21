@@ -1,0 +1,12 @@
+1、新建用户远程连接mysql数据库
+use mysql;
+grant all on *.* to admin@'%' identified by '123456' with grant option;
+flush privileges;					刷新权限表，使配置生效  
+
+2、支持root用户允许远程连接mysql数据库
+use mysql;
+grant all privileges on *.* to 'root'@'%' identified by '597613' with grant option;
+flush privileges;				刷新权限表，使配置生效  
+
+设置用户名为root，权限为%，密码为root
+权限%表示：允许任何ip地址(%表示允许任何ip地址)的电脑用root帐户和密码(root)来访问

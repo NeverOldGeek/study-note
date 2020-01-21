@@ -1,0 +1,30 @@
+HA
+------------------
+	high availability	高可用性
+	持续提供服务的能力	
+
+
+secondarynamenode
+-------------------------
+	时间1小时
+	空间64M
+
+MR
+------------------------
+	MapReduce,编程模型
+	映射+化简
+	谷歌
+	GFS	NDFS
+	Map Reduce
+
+	extends Mapper{
+		map(){
+		......
+		}
+	}
+	extends Reducer{
+		reduce(){
+		......
+		}
+	}
+

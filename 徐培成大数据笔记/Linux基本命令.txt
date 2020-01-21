@@ -1,0 +1,654 @@
+从windows上传文件到linux上
+	1.secureCRT工具
+		通过secureCRT连接上服务器--->右击连接的ip-->选择"连接SFTP标签页(s)"
+			sftp>ls list服务器上当前目录的文件或文件夹
+			sftp>lls list客户端上当前目录的文件或文件夹
+			sftp>pwd 显示服务器端当前位置的路径名
+			sftp>lpwd 显客户端当前位置的路径名
+			sftp>put a.txt 将当前目录下的a.txt 上传到服务器上的当前目录下
+			sftp>get p.txt 获取服务器当前目录的p.txt，放置到客户端的当前目录下
+			
+		注意：保持客户端与服务端编码一致，防止乱码。
+				更改secureCRT编码格式： 1.打开对话窗口，在工具栏中点开“选项”，选择“会话选项”。
+										2.在打开的“会话选项”中，选择“外观”。
+										3.在显示的“窗口和文本外观”中找到“字符编码”。
+										4.把“字符编码”设置为“UTF-8”.
+
+
+	2.scp.exe工具
+		将下载的scp.exe添加到path中，就可以在DOS命令中采用pscp命令上传文件，（需要用户名和密码）
+
+
+	lsb_release -a  查看是linux还是ubuntu
+centos基本命令
+------------------------------------------------------------
+centos			Windows
+ls			dir		//查看目录
+ls --help				//查看命令帮助
+man ls					//查看详细命令帮助
+clear			cls		//清屏
+cd /home		cd d:/		//切换目录
+pwd					//显示当前所在目录
+whoami					//显示当前用户名
+su root					//切换用户 输入密码
+passwd					//修改密码 输入新密码
+ifconfig		ipconfig	//查看ip地址
+ping			ping		//查看网络连通情况
+启动桌面版的网卡（on.）
+cd ～					//回到主目录
+cd -					//回到上次的目录
+ll					//别名 ls -l --autocolor...
+alias					//查看所有别名
+ls -a -l -h				//查看当前目录-h:人性化 -l:列表 -a:显示.开头
+mkdir	a				//创建目录
+touch 	1.txt				//创建文件
+echo helloworld > 1.txt			//重定向输出(1.txt中之前的内容清空)
+echo helloworld >> 1.txt		//重定向输出（追加模式）
+cat 	1.txt		type 1.txt	//查看当前目录下的文件
+cp 1.txt 2.txt				//复制文件
+rm 2.txt				//删除文件
+cp *.txt temp/				//将当前目录下的所有.txt文件复制到目录temp里
+rm * 					//删除当前目录下的所有文件（不包括目录）
+cp 1.txt 2.txt temp/			//最后一个为目标源
+rm -rf temp				//强行递归删除
+mv a.txt tmp/				//将a.txt移动到tmp中
+
+【centos client中切换模式】
+ctrl + alt + f6				//切换到文本模式
+ctrl + alt + f1				//切换到桌面模式
+ctrl + alt + f5				//切换到新的文本模式
+ctrl + alt 				//切换鼠标
+
+【nano文本编辑器,命令行模式】
+nano a.txt				//打开nano编辑器，编辑a.txt文件
+...（进入编辑模式）
+ctrl + o				//保存文件
+ctrl + x				//退出文件
+ctrl + k				//剪切
+ctrl + u				//撤销剪切（类似粘贴）
+home					//回到行首
+end					//去到行尾
+
+
+more 1.txt				//分屏显示
+   q:退出
+   h:帮助
+tail 1.txt				//默认显示最后10行
+head 1.txt				//默认显示前十行
+
+find . | more				// | 是管道符，前面命令的输出作为后面命令的输入
+wc 1.txt				// 统计信息-c：字节数 -l：行数 -w：单词数
+
+hostname				//查看主机名称
+uname -r				//查看系统内核
+
+file xxx.xx				//查看文件类型
+gzip 1.txt				//原地压缩
+gzip -d 1.txt.gz			//原地解压
+gzip -dr tmp				//递归操作文件夹下的文件
+gunzip					//只能解压
+
+tar 					//归档
+tar -cvf my.tar 1.txt 2.txt		//创建归档文件
+tar -xvf my.tar				//解档文件
+
+find . | grep txt | cp `xargs` temp	//xargs是多行变单行，使用空格替换回车换行符
+					//``:是强制命令解析
+
+
+目录与权限
+-----------------------------
+	【Linux文件类型】
+	-				//文件
+	d				//目录
+	l				//链接，类似Windows中的快捷方式
+	b				//block，块文件
+	c				//字符文件
+
+	【Linux权限】
+	一个文件
+		按所属权：u: user(主人)
+			  g: group（组）
+			  o: other（其他人）
+			  ugo=all=a（所有）
+		按文件本身：
+			  r(4):read
+			  w(2):write
+			  x(1):execute
+		  以二进制计算的
+		u		g		o
+	--------------  --------------  --------------
+	|  r | w | x |	|  r | w | x |  |  r | w | x |
+	--------------  --------------  --------------
+
+	【修改权限的命令】：chmod		//修改文件（夹）权限
+			eg: chmod 777 a.txt   	//修改a.txt权限为   -rwxrwxrwx 
+			    chmod g-w		//去除group中write权
+	
+
+   【centos】
+	/					//文件系统的跟
+	/bin					//binary文件，可执行文件
+	/sbin					//super binary（重要性搞）
+
+	/usr/bin				//厂商相关的命令，ubuntu
+	/usr/sbin				//厂商相关的命令，ubuntu
+
+	/usr/local/bin				//用户级别
+	/usr/local/sbin				//用户级别
+
+	/etc					//配置目录
+	/mnt					//挂载目录
+	/boot					//引导目录
+	/dev					//设备目录
+	/lib[64]				//库目录
+	/usr/include				//头文件目录
+-----------------------------------------------------------------------------------
+
+	1.桥接
+		桥接（client完全等价于一台物理主机）
+	2.NAT
+		a.Net Address Transform 网络地址转换
+		b.客户机能访问外网，可以访问局域网内的其他物理主机
+		c.其他局域网内物理主机不能访问客户机
+	3.only host.
+		a.和NAT非常像，不能访问外网
+		b.
+
+	4.查看client机的网络连接模式
+		a.右键选择centos客户机
+		b.点击“设置”
+		c.网络适配器
+
+	5.查看DHCP的分配网段
+		a.VMware-->编辑-->虚拟网络编辑器
+		b.选中Vnet8条目，下方显示的v8的详细欣喜
+		c.点击DHCP设置
+		d.查看分配网段
+
+	【修改静态ip】
+	1.切换root
+	2.编辑/etc/sysconfig/network-scripts/ifcfg-eno16777736
+		a.备份ifcfg-eno16777736文件
+		b.进入 /etc/sysconfig/network-scripts
+		c.编辑ifcfg-eno16777736文件
+			nano ifcfg-eno16777736
+				TYPE=Ethernet					//不变
+				BOOTPROTO=none					//修改
+				DEFROUTE=yes
+				PEERDNS=yes
+				PEERROUTES=yes
+				IPV4_FAILURE_FATAL=no
+				IPV6INIT=no					//修改
+				IPV6_AUTOCONF=no				//修改
+				IPV6_DEFROUTE=no				//修改
+				IPV6_PEERDNS=no					//修改
+				IPV6_PEERROUTES=no				//修改
+				IPV6_FAILURE_FATAL=no				//不变
+				NAME=eno16777736
+				UUID=4788f409-dda6-47ed-9212-c0cd8a7f7c43
+				DEVICE=eno16777736
+				ONBOOT=yes					//修改
+				//添加
+				IPADDR=192.168.98.100
+				PREFIX=24
+				GATEWAY=192.168.98.2
+				DNS=192.168.98.2（网关地址）
+
+			注意：查看ANT网络的网关地址
+				1）vmware-->编辑-->虚拟网络编辑器
+				2）v8条目
+				3）点击“NAT设置”按钮
+				4）查看网关地址
+		d.重启网络服务
+			$>su root 
+			$>service network restart
+		e.解决通过ip能够访问外网，通过域名无法访问外网的问题
+			1）编辑/etc/resolv.conf,添加名称服务器，内容是网关地址
+				nameserver 192.168.98.2
+			2）保存退出
+			3）重启服务
+				$>su root 
+				$>service network restart
+			4）测试www.baidu.com
+				$>ping www.baidu.com
+
+
+service管理命令
+----------------------------------------
+	$>service network status
+	$>service network start
+	$>service network stop
+	$>service network restart
+
+
+mount挂载外设
+----------------------------------------
+	1.右键client右下角的光盘图标->设置
+	2.iso文件
+		选择一个iso镜像文件
+	3.右键client(客户机)右下角的光盘图标->连接
+	4.创建文件夹/mnt/cdrom
+		$>su root
+		$>mkdir cdrom
+	5.挂载光驱/dev/cdrom 到 /mnt/cdrom
+		$>mount /dev/cdrom /mnt/cdrom
+		$>find . /mnt/cdrom
+
+
+卸载外设
+-----------------------------------------
+	1.从挂载的目录中出来，否则出现设备繁忙
+	2.使用umount进行卸载
+		$>umount /mnt/cdrom
+
+启用client和host之间共享目录功能
+------------------------------------
+	1.右键点击vmware中的client机，选择设置
+	2.找到“选项” -> “共享文件夹”
+	3.选择”总是启用“
+	4.在文件夹区域中添加要共享的目录
+		d:/downloads
+	5.确定
+	6.重启客户机
+
+	共享目录在centos中的mnt里面（若没有则需安装虚拟机增强工具）
+
+虚拟机增强工具
+------------------------------------------
+	1.原理
+		插入iso（E:\gangpu\ruanjian\VMware Workstation-full v11.1.2\linux.iso）文件导光盘中
+	2.vmware虚拟机菜单 -> 重新安装
+	3.自动会将E:\gangpu\ruanjian\VMware Workstation-full v11.1.2\linux.iso镜像文件插入光驱中，并直接打开
+	4.复制VMwareTools-9.9.3-2759765.tar.gz文件到centos桌面下
+	5.tar开该文件
+		鼠标右键点击桌面的tar.gz,选择extract here
+	6.进入桌面的vmware-tools-distrib目录下
+		$>su root
+		$>cd /home/cenosone/Desktop/vmware-tools-distrib
+	7.执行安装脚本
+		$>./vmware-install.pl
+
+
+
+
+	【Putty（发音：party）】
+	1.运行putty.exe
+	2.输入ip地址
+	3.点击open
+
+修改文件的owner，change owner
+------------------------------------------
+	chown -R root:root a.txt		//递归修改owner
+	chmod -R 777 xxx			//递归修改权限
+
+创建连接文件
+------------------------------------------
+	1.硬链接
+		两个完全相同的文件，类似于实时备份。两个文件之间完全同步（向一个文件中添加内容，另一个文件内容也改变）
+		删除时，只删一个
+		目录不能使用硬链接
+		eg: ln atxt alink		//a.txt:源文件  alink：连接名称（随意）
+	2.符号连接
+		创建的符号连接保存的就是指向目标文件的路径，当目标文件存在时，为浅蓝色，目标文件不存在时
+		为红色
+		目录可以使用符号链接
+		eg: ln -s a.txt alk		//a.txt:源文件  alk：连接名称（随意）
+sudo
+----------------------------
+	临时借用root的权限执行命令，只在当前命令下有效，命令结束后还是原来用户。
+	1.配置当前用户具有sudo的执行权利
+		[/etc/sudoers]
+		...
+		root ALL=(ALL) ALL 
+		centosone ALL=(ALL) ALL (此处为添加的一行，让centosone 也拥有权限)
+		...
+	$>sudo chown -R centosone:centosone .
+
+jobs(作业)
+-------------------------------------
+	放到后台的进程称为作业
+	1.将程序放到后台运行，以&结尾
+		$>nano b.txt &
+	2.查看后台运行的jobs数
+		$>jobs
+	3.切换后台作业到前台来
+		$>fg %n				//n是job编号
+	4.前台正在运行的进程，放到后台
+		ctrl + z
+	5.让后台作业运行
+		$>bg %1				//1是job编号
+	6.杀死作业
+		$>kill %1			//
+
+进程查看，process show
+--------------------------------------
+	$>ps -Af | grep gnome			//-A:所有进程，-f:所有列格式
+	$>top					//动态显示进程信息，含有cpu、内存的使用情况
+						//按q退出
+cut
+---------------------------------
+	剪切显示文件的每一行
+	$>cut -c 1-5 a.txt			//显示a.txt中每行的第一到第五个字符
+	$>ps -Af | cut -c 45-80 | more
+查看帮助
+------------------------
+	help
+	man
+	info
+
+
+
+磁盘分区使用
+-------------------------------
+	$>fdisk -l /dev/sda
+
+查看磁盘使用情况df(disk free)
+------------------------------
+	$>df -ah /home/centosone		//查看磁盘空间的使用情况
+	
+(diskdump)$>dd					//用的很少
+
+dirname
+----------------------------------------
+	取出指定地址的上级目录
+	$>dirname /a/b/c/d			//输出$>/a/b/c
+
+basename
+---------------------------------------
+	取出指定目录的当前目录
+	$>basename /a/b/ac/d			//输出$>d
+
+修改主机名
+-----------------------------------------
+	$>hostname				//显示主机名
+
+	$>nano /etc/hostname			//修改主机名
+	  s100
+配置主机名和ip地址的映射
+----------------------------------------
+	[/etc/hosts]
+	127.0.0.1 localhost
+	192.168.98.100 s100			
+
+重启命令
+----------------------------------------
+	$>reboot				//重启
+	$>halt					//停止，（类型黑屏）
+	$>poweroff				//关机
+
+
+命令嵌套
+-----------------------------------------
+	1.使用``
+		$>echo `cat a.txt`		//不支持命令嵌套
+		$>$(....$())			//支持命令嵌套
+
+创建用户
+--------------------------------------------
+	0.用户和组之间，一个用户可以属于多个组，
+	  但是有一个首要组
+	1.adduser
+		符号连接 链接到useradd
+	2.useradd
+		$>su root
+		$>useradd -m centos2
+		$>passwd ceontos2
+			输入密码
+			重复输入
+
+	3.userdel		//删除用户
+
+	4.usermod -a -G groupA user //添加user用户到groupA，并且user用户不离开其他组
+
+	5.groupadd 	//创建组
+	
+	6.cat /etc/passwd 可以查看所有用户的列表
+	  cat /etc/group 查看用户组
+	  groups 查看当前登录用户的组内成员
+	  groups test 查看test用户所在的组，以及组内成员
+
+访问文件（夹）物理位置
+----------------------------------
+	$>cd -p /t
+	$pwd -p
+
+访问环境变量
+-----------------------------------
+	echo $(PATH)
+	echo $PATH
+	echo "PATH"
+
+export定义环境变量
+----------------------------------------
+	$>export name=$(PATH):tom
+	$>export name=$(var1:-$(var2)) //设置name为var1的值，var1没有设置为$(var2)的值
+
+命令执行过程
+-------------------------------------------
+	$?			//命令的返回值存储变量， 0：成功 1：失败
+	$#			//参数的个数
+	$1			//第几个参数
+	$0			//当前脚本（命令）名称
+	$@			//取出所有参数
+	shift			//参数左移
+	$(a/b/c)
+
+注意：写脚本表达式之间最好不要空格eg:i=0，括号括起来的表达式，最好与正反括号留空格eg:（ 表达式 ）
+if
+----------------------------------------------
+	if [ $# -lt 1 ]		//if参数个数小于1(中括号两边留空格)
+	if [ $# -gt 1 ]		//if参数个数大于1
+	if [ $# -lt 1 ]		//if参数个数小于1
+
+for
+-----------------------------------------
+	#!bin/bash
+	lines=5;//此处等号两边不能有空格eg：lines = 5 （错误）
+	for ((x=0; x <= $lines; x = $x + 1));do
+		for ((y=1; y <= $x; y = $y + 1)); do
+			echo -n $y;
+		done;
+		echo;
+	done;
+
+	for x in a b c d e; do echo $x; done;
+
+
+while
+-------------------------------------------
+	#!bin/bash
+	(( i=0 ))
+	while (( i<100)); do
+	   echo $i;
+	   i=$(( i+1 ));
+	done
+
+	打印九九乘法表
+	#!bin/bash
+	i=1
+	lines=$1		//$1传入的第一个参数，有点类似占位符
+	while (( i<=$lines )); do
+	   j=1
+	   while(( j<=$i)); do
+		echo -ne ${j}x${i}=$(( j*i))'\t';
+		j=$(( j+1));
+	   done;
+	   i=$(( i+1));
+	   echo;
+	done;
+
+命令组合
+----------------------------------
+	a && b			//a成功后执行b
+	a || b			//a失败后执行b
+	a ; b			//无逻辑关系，改变目录
+	(a ; b)			//无逻辑关系，不改变目录
+
+
+
+netcat
+----------------------------------------------
+	[server]
+	nc -lk 8888		//-l:监听  -k：接受多个监听
+
+
+	[client]
+	nc ip 8888		//客户端指定服务器
+
+windows下nc
+----------------------------------------------
+	1.配置环境变量path
+	2.常用命令
+		cmd>nc -h			//看帮助
+	3.启动服务器端
+		cmd>nc -l -p 8888 -s 0.0.0.0	//通配ip
+
+查看端口
+---------------------------------------------
+	netstat -anop		//显式网络情况
+				//-a:所有socket
+				//-n：显示数字地址
+				//-p:pid
+				//-o:timer
+
+
+【centos-min】
+------------------------------
+软件源
+-----------------------------------------
+	Repository		//仓库
+	URL			//http://
+	.d			//directory目录
+	xxxd			//daemon(守护进程)
+
+查看仓库
+------------------------------
+	/etc/yum.repos.d/
+
+
+curl
+---------------------------
+	传输url上的数据
+	[下载]
+	curl -o /etc/yum.repos.d/aliyun.repo http://mirrors.aliyun.com/repo/Centos-7.repo
+which
+---------------------------
+	查看某个命令文件的位置
+	which ifconfig
+
+更换centos软件源
+-------------------------------------
+	1.下载仓库文件
+		curl -o /etc/yum.repos.d/aliyun.repo http://mirrors.aliyun.com/repo/Centos-7.repo
+	2.将repo文件保存到/etc/yum.repos.d目录中
+
+屏蔽软件仓库
+-----------------------------------
+	1.将/etc/yum.repos.d/xxx.repo文件删除或更换扩展名即可
+
+使用yum进行软件包安装卸载
+---------------------------------
+	1.yum list			//列出所有软件包
+	2.yum list installed		//列出已经安装的软件包
+	3.yum list installed | grep nano//查看是否安装某个软件
+	4.yum search nano		//在yum的软件源中搜索软件
+	5.yum remove nano		//卸载软件
+
+	$>mkdir /home/centos/rpms
+	$>sudo yum install --downloadonly	//指定只下载不安装
+			--downloaddir=/home/centos/rpms		//指定目录
+	//下载已安装的软件
+	$>sudo yum reinstall --downloadonly
+			     --downloaddir=/home/centos/rpms wget
+
+	$>sudo yum localinstall xxx.rpm		//从本地rpm文件直接安装软件\
+
+	$>yum search ifconfig			//查找ifconfig命令对应的软件包名
+
+	$>yum clean cache			//清除缓存
+	$>yum makecache				//生成缓存
+
+
+制作iso镜像文件
+-----------------------------------------------------
+	0.清除yum缓存文件
+		$>sudo yum clean cache
+	1.重新制作yum缓存
+		$>sudo yum makecache
+	2.搜索mkisofs软件包
+		$>sudo yum search mkisofs
+	3.安装mkisofs软件包
+		$>sudo yum install mkisofs
+	4.查看是否安装成功
+		a)$>which mkisofs
+		
+		b)$>sudo yum list installed |grep geniso //geniso是软件包名
+	5.制作iso文件
+		$>sudo mkisofs -r					//-r:保留原文件
+			-o Centos-7-Packages.iso /home/centos/rpms	//-o:输出的iso文件名
+	6.挂载iso文件到client的光驱中
+		点击右下角的光驱图标
+
+	7.挂载cdrom中的文件到/mnt/cdrom
+		$>mount /dev/cdrom /mnt/cdrom
+	8.复制/mnt/cdrom/*到/home/centos/rpms
+		$>su centos
+		$>mkdir ~/rpms
+		$>cp /mnt/cdrom/* /home/centos/rpms
+	9.挂载vmware安装目录下的linux.iso（虚拟机增强工具镜像文件）文件
+		a)卸载/mnt/cdrom目录
+			$>sudo umount /mnt/cdrom
+		b)插入linux.iso镜像文件到光驱
+		c)连接设备
+		d)挂载/dev/cdrom到/mnt/cdrom
+			$>nount /dev/cdrom /mnt/cdrom
+		e)复制/mnt/cdrom*到/home/centos/linux/目录下
+
+
+[centos@localhost] 变为 [centos@bogon]解决办法
+-----------------------------------------------
+一：修改linux主机的配置文件/etc/sysconfig/network 和 /etc/hosts
+ 1.修改/etc/sysconfig/network里面的主机名字。
+# vi /etc/sysconfig/network
+ NETWORKING=yes
+ HOSTNAME=yourname //在这修改hostname
+ GATEWAY=192.168.1.1 //你的IP地址
+2.修改/etc/hosts里面的名字
+# vi /etc/hosts
+ 127.0.0.1 localhost.localdomain localhost
+ 192.168.1.121 yourname //在这修改hostname //你的IP地址
+//有时候只有这一行
+127.0.0.1 yourname localhost.localdomain localhost
+
+
+
+安装虚拟机增强工具
+--------------------------------------
+	1.挂载并复制linux.iso镜像文件到/home/centos/linuxiso中
+	2.tar开VM-xx-xxx.tar.gz
+		$>su centos;cd ~/linuxiso
+		$>tar -xzvf VMxxx.tar.gz
+		$>cd vmware-tools-distrib
+		$>sudo ./vmware-install.pl
+		出现perl没有解释器的错误
+			解决办法:
+			$>cd /home/centos/rpms
+			$>sudo yum localinstall perl-5.16.3-292.x86_64.rpm
+		出现gcc path 找不到
+			解决办法:
+			$>cd /home/centos/rpms
+			$>sudo yum localinstall gcc-xxx.rpm
+		出现kernel-headers path 找不到
+			解决办法:
+			$>cd /home/centos/rpms
+			$>sudo yum localinstall kernel-devel-xxx.rpm
+
+
+
+//临时关闭防火墙
+systemctl stop firewalld
+//禁止开机启动防火墙
+systemctl disable firewalld
+Removed symlink /etc/systemd/system/multi-user.target.wants/firewalld.service.
+Removed symlink /etc/systemd/system/dbus-org.fedoraproject.FirewallD1.service.

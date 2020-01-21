@@ -1,0 +1,24 @@
+杂记：资源文件中不能填中文，需要编码。java中为我们提供了编码工具
+	native2ascii,只需要在命令行窗口运行中文会自动编码
+
+	2.java中collections类有将集合转成线程安全的集合的方法
+	3.java中可以通过new Timer（）创建一个定时器，然后调对象中的方法在指定的时间做指定的事
+	4.普通迭代器在正在迭代集合时，此时不能往集合中添加元素，有此需求时，我们应该用ListIterator
+	  这个迭代器，然后调用迭代器的方法删除集合中的元素
+	5.struts内部封装数据是通过beanutils框架，所以支持setProperty（bean,"user.usename","张三"）这种形式
+	  且beanutils在调setProperty和getProperty等方法时内部都会先调convert
+使用Struts的html标签完成数据回显时注意的问题：
+	html标签回显数据时，会以org.apache.struts.taglib.html.BEAN为关键字，从各个域中查找bean，找不到则抛空指针异常。所以使用html标签时域中须有以org.apache.struts.taglib.html.BEAN为关键字的对象。
+	这个工作可以交给html:form标签做，html:form标签在执行时，会查找域中已有的formbean，并以org.apache.struts.taglib.html.BEAN为关键字把formbean存在域中。如果html:form标签在域中找不到formbean，则html:form标签会实例化一个空bean，然后存储到域中。因此，为了在页面中使用struts的html标签回显数据，这些标签需要配合html:form标签使用。（查看html:form标签的源文件可以看到这点）。
+	对于复选框中的数据，Html:checkbox标签不能完成数据回显，复选框的数据回显需要使用html:multibox。
+	Struts中的html:password标签也会回显数据，如果不想password回显，需要把其redisplay属性置为false。
+	补充：formbean的reset方法：在往formbean中填充数据之前会将formbean中的内容清空
+struts防表单重复提交
+	用struts标签建的一个表单会有一个隐藏字段，记住提交的表单，防重复
+
+解决struts表单提交乱码问题：
+	1.写过滤器
+	2.重写ActionServlet
+	3.重写RequestProcessor
+
+struts可以管理多个struts-config文件，只需将多个配置文件在web.xml中配置，用逗号隔开

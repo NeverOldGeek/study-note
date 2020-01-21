@@ -1,0 +1,322 @@
+可以直接将要加载的文件放到root目录下（root目录里的文件都可以删）
+
+
+servlet运行于服务端
+javax.servlet.http.*
+javax.servlet.*
+
+怎样将servlet程序映射到一个URL地址上
+	在web.xml文件中使用<servlet>元素和<servlet-mapping>元素完成
+		<servlet>元素用于注册servlet，包含两个子元素<servlet-name>
+		和<servlet-class>，分别用于设置注册名称和完整类名
+
+		<servlet-mapping>元素用于映射已注册的servlet的一个对外访问路径，
+		包含两个元素<servlet-name>和<url-pattern>分别用于指定servlet的注册名称
+		和servlet的对外访问路径
+	
+	servlet的细节：
+		1.同一个servlet可以被映射到多个URL上
+		2.在servlet映射的URL中也可以使用*通配符
+		只能以下两种方式：
+			一种是“*.扩展名”
+			另一种是：/...(自定义字符串)/*
+几个重要的类：
+	servlet,genericServlet,Http...
+	servlet配置对象：ServletConfig
+			 ServletContext（代表整个web应用）
+doget():
+超链接
+form表单提交，但form提交时，method属性设置为get
+
+通过URL提交数据
+通过表单提交数据
+
+处理post请求乱码：request.setCharacterEncoding("UTF-8")；
+处理get请求乱码：打开confi目录下的server.xml配置文件，在里面的
+
+init()时期
+service()运行时期
+destroy()时期
+
+jsp语法
+	1.jsp模板元素
+		jsp页面中的HTML内容称之为JSP模板元素
+	2.jsp脚本表达式
+		jsp脚本表达式用于将程序输出到客户端
+		格式：<%= 变量或表达式%>
+		注意：jsp脚本表达式中的变量或表达式后面不能有分号
+	3.jsp脚本片段
+		格式：<% 多行java脚本片段%> 
+			jsp脚本片段中的java片段都会被翻译到service方法中
+	4.jsp声明
+		格式: <%! %>
+		1.jsp页面中编写的所有代码，默认会翻译到servlet的service方法中，而jsp
+		  声明中的所有java代码被翻译到_jspService方法的外面
+
+		2.所以，jsp声明可以用于定义jsp页面转换成的Servlet程序的静态代码块，成
+		  员变量和方法
+
+		3.jsp隐式对象的作用范围仅限于Servlet的_jspService方法，所以在jsp声明中
+		  不能使用这些隐式对象
+
+		4.可以用jsp声明的定义与jsp翻译成servlet后的方法相同的方法来覆盖jsp翻译成servlet后的方法
+	5.jsp注释
+		格式：<%--注释的内容--%>
+
+	6.jsp指令
+		jsp指令是为jsp引擎而设计的，只是告诉引擎如何处理jsp页面中的其余部分
+ 		jsp指令语法格式：
+				<%@ 指令 属性名="值"%>
+		1.page指令
+			page指令用于定义jsp页面的各种属性，page指令无论出现在jsp页面中的什么地方，它作用的都是整个页面
+		2.include指令
+		   语法格式：<%@ include file="路径"%>
+			 include指令用于引入其他jsp页面，如果使用include指令引入了其它jsp页面，那么jsp引擎将
+			 把这两个jsp翻译成一个servlet，所以include指令通常也称之为静态引入
+		3.taglib指令
+	7.jsp九大内置对象
+		requset
+		response
+		session
+		application
+		config
+		page
+		pageContext
+		exception 
+
+		out隐式对象
+			通过pageContext对象的getOut方法得到
+			是JspWriter类型，相当于一种带缓存功能的PrintWriter
+
+			在同一个servlet中不能同时获得字符输出流和字节输出流
+
+		pageContex对象
+			pageContext对象代表jsp页面的运行环境，这个对象不仅封装了对其他8大隐式对象的引用，
+			它自身还是一个域对象，可以用来保存数据。并且这个对象还封装了web开发中经常涉及到
+			的一些常用操作，例如引入和跳转其他资源、检索其他域对象中的属性等
+		
+			pageContext对象中还封装了访问其他域的方法
+			public Object getAttribute(Stirng name, int scope)
+			public void setAttribute(Stirng name, Object value, int scope)
+			public void removeAttribute(Stirng name, int scope)
+
+		代表各个域的常量
+			PageContext.APPLICATION_SCOPE 其他常量类似
+
+		重点：findAttribute方法（查找各个域中的属性，EL表达式所依赖的方法）
+
+		PageContext类中定义了一个forward方法和两个include方法来分别简化和
+		替代RequestDispatcher.forward方法和include方法
+			（方法接受的资源如果以"/"开头，"/"代表当前web应用，pageContext是jsp独有的servlet中并没有）
+
+	8.jsp标签
+		常用标签
+			1.<jsp:include>标签
+			2.<jsp:forward>标签
+			3.<jsp:param>标签
+				<jsp:param>标签可以为include标签和forward标签传递参数
+	jsp中request，session，application的选用
+		当客户向服务器发请求，产生数据，用户看完就没用了，像这样的数据就存在request域中
+		当客户向服务器发请求，产生数据，用户用完等一会儿还有用，像这样的数据就存在session域中
+		当客户向服务器发请求，产生数据，还要给其他用户用，像这样的数据就存在request域中
+
+
+
+什么是JavaBeen
+JavaBean是一个遵守特定写法的java类，有如下特点：
+	1.这个java类必须有一个无参的构造函数
+	2.属性必须私有化
+	3.私有化的属性必须通过public类型的放法暴露给其他程序，并且方法的命名也必须遵守一定的命名规范
+
+	JavaBean在开发中通常用于封装数据，对于遵守以上写法的JavaBean组件，其他程序可通过
+	反射技术实例化JavaBean对象，并且通过反射那些遵守命名规范的方法，从而获取JavaBean的
+	属性，进而调用其属性保存的数据
+
+	jsp中三个关于JavaBean的组件
+
+		1.<jsp:useBean>
+		2.<jsp:setProperty>
+		3.<jsp:getProperty>
+
+mvc模式和三层架构
+	M:model 	对应JavaBean
+	V:view		对应jsp
+	C:control	对应servlet
+
+	三层架构：web层，service层，dao层
+
+	eg：com.gump.bean包
+	    com.gump.dao
+	    com.gump.dao.impl
+	    com.gump.service
+	    com.gump.sevice.impl
+	    com.gump.web.controller
+	    com.gump.web.filter
+	    com.gump.web.listener
+	    com.gump.utils
+
+	     Web-inf/jsp目录保存jsp文件
+
+EL表达式和jstl
+	el表达式取普通数据，bean中的属性，list集合中的数据，map集合中的数据
+		注意：取map集合数据实际上是将map集合中的键值对转换成Map.Entry对象
+			然后放到Set集合中
+
+jstl（自定义标签）
+	使用自定义标签只需两步：
+		1.编写一个实现Tag接口的Java类（标签处理类）
+		2.编写标签库描述符（tld）文件，在tld文件中对标签处理类进行描述
+
+	实现步骤：
+		1.编写一个实现Tag接口的Java类
+			参见jstl图1-1
+		2.在web-inf/目录下新建tld文件，在tld文件中对标签处理器进行描述
+			参见jstl图1-2
+		3.在jsp页面中导入并使用自定义标签
+			参见jstl图1-3
+
+
+
+	自定义标签扩展功能：
+		1.控制jsp页面某一部分内容是否执行
+			编写一个实现Tag接口的Java类，控制dostarttag方法的返回值，如果这个方法返回EVAL_BODY_INCLUDE,
+			则执行标签体，如果返回SKIP_BODY,则不执行标签体
+
+		2.控制整个jsp页面是否执行
+			编写一个实现Tag接口的Java类，控制doendtag方法的返回值
+	
+		3.控制jsp页面内容重复执行
+			编写一个实现Iterationtag接口的Java类，控制daAfterBody方法的返回值	
+
+		4.修改jsp页面内容输出
+			编写一个实现BodyTag接口的Java类，控制doStartTag方法的返回值，返回EVAL_BODY_BUFFERD,
+			则web服务器会创建BodyContent对象捕获标签体，开发人员在doendtag方法体内，得到代表标
+			签的bodycontent对象，从而就可以对标签体进行修改...等操作
+		
+		参见Jstl java类关系图
+
+
+
+
+
+
+EL表达式
+	EL表达式主要作用
+		1.获取数据
+			el表达式取普通数据，bean中的属性，list集合中的数据，map集合中的数据
+		2.执行运算
+			empty运算符：eg:empty(list)
+				三目运算符：${user!=null?user.name:""}
+				[]和.运算符：
+		3.获取web开发常用对象
+			el表达式中定义了11个隐式对象
+				pageContext，pageScope，requestScope
+				sessionScope，applicationScope，
+				param:表示一个保存所有请求参数的Map对象
+				paramValue：表示一个保存所有请求参数的Map对象，他对于某个请求参数返回的是String[]
+				header:表示一个保存了所有http请求头字段的Map对象
+				headerValues：同上，返回String[]数组。注意如果有"."例如Accept-Encoding，则要headerValues["Accept-Encoding"]
+				cookie:表示一个保存了所有cookie的Map对象
+				initParam：表示一个保存了所有web应用初始化参数的map对象
+		4.调用java方法
+			EL表达式语法允许开发人员开发自定义函数，以调用Java类的方法
+				1.eg：${prefix: method(params)}
+				2.在EL表达式中调用的只能是Java类的静态方法
+				3.这个Java类的静态方法需要在TLD文件中描述，才可以被EL表达式调用
+				4.EL自定义函数用于扩展EL表达式的功能，可以让EL表达式完成普通Java
+				  Java程序代码所能完成的功能
+
+			EL Function开发步骤
+				1.编写一个Java类的静态方法
+				2.编写标签库描述符（tld）文件，在tld文件中描述自定义函数
+				3.在jsp页面中导入和使用自定义函数
+
+			EL表达式自定义函数注意事项
+				参见EL表达式自定义函数注意事项图1-5
+
+			sun公司的EL函数库简介
+				sun公司定义了一套关于处理字符串的函数库
+
+Jstl标签库简介
+	1.核心标签库（c.tld）
+		<c:out>：用于输出一段文本内容到pageContext对象当前保存的“out”对象中
+		<c:set>:eg:<c:set property="" value="" target=""/>
+		<c:remove>
+		<c:catch>
+		<c:url>	标签用于在jsp页面中构造一个url地址，其主要目的是实现URL重写。URL重写就是将会话
+			标识号以参数
+		<c:param>配合<c:url>标签使用
+		<c:redirect>请求重定向		
+
+	2.国际化标签库（fmt.tld ）
+		DataFormat，NumberFormat，MessageFormat，模式字符串与占位符
+
+	3.数据库标签（sql.tdl）
+
+
+	4.XML标签（x.tld）
+
+
+	5.JSTL函数（EL函数）（fn.tld）
+
+
+文件上传与下载
+	实现web开发中的文件上传功能，需完成如下两步操作：
+		1.在web页面中添加上传输入项
+		2.在servlet中读取上传文件的数据，并保存到本地硬盘中
+	如何在web页面中添加上传输入项
+		通过标签<input type="file">
+			1.必须色泽输入项的name属性否则浏览器将不会发送上传文件的数据
+			2.必须把form的enctype属性值设为multipart/form-data 设置该值后，
+			  浏览器在上传文件时，将把文件数据附带在http请求消息体中，并
+			  使用MIME协议对上传的文件进行描述，以方便接受对方上传数据进行
+			  解析和处理
+
+			注意当form表单的enctype属性值设为multipart/form-data后，在servlet
+			端不能通过request.getparamter(）方法获取
+
+			通过request.getInputStream方法获得输入流读入整个文本
+			然后通过两个jar包（common-fileupload和common-io）解析文件
+
+
+filter（过滤器）
+	1.当两个过滤器都可以对所有web资源进行拦截，则在web.xml中配在前面的先执行
+	2.FilterChain（Filter链）：由所有Filter组成的链，通过chain.doFilter(request,response)
+	  方法将请求交给下个Filter执行，若已经是最后一个Filter则目标资源会执行
+
+	filter的三种典型应用：
+		1.可以在filter中根据条件决定是否调用chain.doFilter(request,response)方法
+		  即是否让目标资源执行
+
+		2.在让目标资源执行之后，可以捕获目标资源的执行结果，从而实现一些特殊功能
+
+	filter常见应用：
+		1.解决全栈乱码问题
+		2.控制浏览器不要缓存动态web资源
+		3.控制浏览器缓存页面中的静态资源的过滤器
+		4.使用Filter实现URL级别的权限认证
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+

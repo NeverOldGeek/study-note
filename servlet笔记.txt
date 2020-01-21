@@ -1,0 +1,147 @@
+配置一个网站：
+	1.在硬盘上创建网站对应的目录，在目录放一个web应用--放一个web资源
+	2.在server.xml文件中配置一个host元素，让host元素指向网站目录
+	3.在Windows操作系统的host文件配置网站的主机名
+	4.使用ie访问
+
+加密
+	浏览器要向服务器发送数据 ，服务器生成一对（公钥，私钥），然后认证生成数字证书（包含证书标号和公钥）
+	生成服务器的数字证书：DOS命令：keytool-genkey-alias tomcat-keyalg RSA
+				       设置密码
+					确认密码 
+					选择主机位置（参考G:\BaiduYunDownload\方立勋\day04javaweb视频05公钥私钥及配置加密连接器.avi）
+	到tomcat中配置加密的浏览器
+
+
+
+HTTP协议简介：
+	1.HTTP1.0
+		客户端与web服务器建立连接后，只能获得一个web资源
+
+	2.HTTP1.1
+		允许客户机与web服务器建立连接后，在一个连接上获取多个web资源 
+	HTTP请求细节
+		1.请求行
+			请求行中的GET称为请求方式，请求方式有：
+				POST,GET,HEAD,OPTIONS,DELETE,TRACE,PUT
+			常用有GET,POST
+				GET:可以在URL地址后加？以键值对形式带数据，多对之间用&连接（带的数据容量不能超过1k,不能是中文（要改变编码））
+				POST：POST请求可以在请求实体内容中向服务器发送数据（传递的数据无限制）
+					注意:当通过表单提交用get时，提交时会将表单的数据带在URL地址后
+		2.请求头（消息头）
+			accept:浏览器通过这个头告诉服务器,它所支持的数据类型
+			accept-Charset:浏览器通过这个头告诉服务器,它支持哪种字符集
+			accept-Encoding:浏览器通过这个头告诉服务器,它所支持的压缩格式	
+			accept-Language:浏览器通过这个头告诉服务器,它的语言环境
+			host:浏览器通过这个头告诉服务器,想访问哪台主机
+			If-Modified-Since:浏览器通过这个头告诉服务器，（浏览器通过服务器访问某个网页时会缓存这个网页）缓存数据的最新时间
+			Referer:  浏览器通过这个头告诉服务器,客户机是从哪个页面来的，（主要用来防盗链）
+			User-Agent:浏览器通过这个头告诉服务器，浏览器名称，版本等（不重要）
+			Cookie：
+			Connection:close/Keep-Alive(断开连接或保持连接)，浏览器通过这个头告诉服务器,请求完了是断开连接还是保持连接	
+			Date:	浏览器通过这个头告诉服务器,发出请求的时间	
+		3.请求体
+			只有通过post方法提交的数据才能放到请求体中
+			请求的数据（客户机带给服务器的数据）
+	HTTP响应细节
+		1.响应行
+			描述服务器对请求的处理的结果
+				格式：HTTP版本号 状态码 原因
+				eg：HTTP/1.1 200 OK  一般200代表处理ok
+				状态码		含义
+				100-199		表示成功接受请求，要求客户机继续提交下一次请求才能完成整个处理过程
+				200-299		表示成功接受请求，并已完成整个处理过程，常用200
+				300-399		为完成请求，客户需进一步细化请求。例如，请求的资源已移到一个新地址，常用302,307和304
+				400-499		客户端的请求有错误，常用404
+				500-599		服务器端出现错误
+		2.响应头（消息头）
+			Location:服务器通过这个头，来告诉浏览器跳到哪里
+			Server:服务器通过这个头，来告诉浏览器服务器的型号
+			Content-Encoding:服务器通过这个头，来告诉浏览器数据的压缩格式
+			Content-Length:服务器通过这个头，来告诉浏览器回送数据的长度
+			Content-Language:服务器通过这个头，来告诉浏览器语言环境
+			Content-Type:服务器通过这个头，来告诉浏览器回送数据的类型
+			Last-Modified:
+			Refresh:服务器通过这个头，来告诉浏览器定时刷新
+			Content-Disposition:服务器通过这个头，来告诉浏览器以下载的方式打开数据
+			Transfer-Encoding服务器通过这个头，来告诉浏览器数据是以分块的方式回送的
+			Set-Cookie：
+			Expires:-1 控制浏览器不要缓存（如果需要缓存后面写缓存保留的时间）
+			Cache-Control:no-cache 控制浏览器不要缓存（如果需要缓存后面写缓存保留的时间）
+			Pragma: no-cache 控制浏览器不要缓存（如果需要缓存后面写缓存保留的时间）
+			Connection:close/Keep-Alive(断开连接或保持连接)，浏览器通过这个头告诉服务器,请求完了是断开连接还是保持连接	
+			Date:	服务器通过这个头，来告诉浏览器响应的时间
+		3.响应体
+Servlet类
+	由于客户端是通过URL地址访问web服务器中的资源，所以Servlet程序若想被外界访问，必须把servlet程序
+	映射到一个url地址上，这个工作在web.xml文件中使用<servlet>元素和<servlet-mapping>元素完成
+
+
+
+
+ServletConfig对象：
+	1.在Servlet的配置文件中，可以使用一个或多个<init-param>标签为servlet配置一些初始化参数
+	2.当servlet配置了初始化参数后，web容器在创建servlet实例时会自动将
+	  这些初始化参数封装到ServletConfig对象中，并在调用Servlet的init方法时：将ServletConfig对象
+	  传递给servlet，进而，程序员通过ServletConfig对象可以得到当前servlet的初始化参数信息
+
+
+
+
+ServletContext
+1.web容器在启动时，他会为每个web应用程序创建一个对应的ServletContext对象：代表整个web应用
+
+2.由于一个web应用中的所有Servlet共享同一个ServletContext对象，因此Servlet对象之间可以通过
+  ServletContext对象来实现多个Servlet之间的通讯
+3.可以通过<context-param>元素的两个子元素<param-name>和<param-value>来设置整个web应用的初始化参数
+	1.ServletContext实现转发
+		RequestDispatcher rd = servletContext.getRequestDispatcher("path");
+		rd.forward(req,resp);
+		注意：1.通过rd.forward(req,resp)提交服务器会将response中的内容清空
+		      2.在rd.forward(req,resp)提交之前如果将resp.getOutputStream().close()输出
+			流关闭（即强行响应完成），则无法转发会抛出异常
+注意： 相对路径，记住代码有谁运行就相对谁的路径（代码由虚拟机运行）在哪个目录下启动虚拟机就相对哪个目录
+	2.要读取web应用的资源文件建议使用ServletContext下的getResource（path）方法读由于工程发布到tomcat
+	  之后会到WEB-INF下的classes目录下
+		还可以通过类的装载器来读
+
+HttpServletResponse
+	//告诉浏览器以utf-8码打开数据
+	response.setHeader("Content-Type","text/html;charset=utf-8")
+
+	//通知response以utf-8输出
+	response.setCharacterEncoding("utf-8");此语句必须写在获取输出流之前
+
+	通过response生成随即图片
+	用BufferedImage，Graphics类
+
+
+监听器：
+	1.监听三个域对象的创建和销毁
+		HttpSessionListener
+		ServletContextListener
+		ServletRequestListener
+	2.监听三个域对象属性的增删，替换
+		ServletRequestAttributeListener
+		HttpSessionAttributeListener
+		ServletContextAttributeListener
+	3.感知session绑定的监听器（注意事件源不是session，而是对象自己）
+	     注意：实现以下两个接口的类不需要在web.xml中注册
+		session绑定的几种状态
+		   HttpSessionBindingListener
+			1.绑定到session中
+			2.从session中解除绑定
+		   HttpSessionActivationListener
+			3.随session对象持久化到一个设备中（钝化）
+			4.随session对象从一个设备中恢复（活化）
+
+
+
+数据源与连接池
+数据源：
+	获取数据库连接的来源
+		1.JDBC
+		2.ODBC
+		3.使用连接池+JNDI
+	连接池
+		运行一开始就向数据库申请很多连接

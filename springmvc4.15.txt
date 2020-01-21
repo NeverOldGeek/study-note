@@ -1,0 +1,37 @@
+1.服务器启动，服务器装入DispatcherServlet，此时调用父类HttpservletBean的init方法
+				==》Set bean properties from init parameters. 从init参数中设置bean属性
+				===》调用FrameWorkServlet子类的initServletBean方法
+
+		initServletBean方法：
+·					1.调用initWebApplicationContext方法初始化webApplicationContext
+						initWebApplicationContext方法
+							调用DispatcherServlet的onFresh方法==》initStrategies(context)==》
+									initMultipartResolver(context);
+									initLocaleResolver(context);
+									initThemeResolver(context);
+									initHandlerMappings(context);
+									initHandlerAdapters(context);
+									initHandlerExceptionResolvers(context);
+									initRequestToViewNameTranslator(context);
+									initViewResolvers(context);
+									initFlashMapManager(context);
+					2.调用initFrameworkServlet方法==》留给子类可能会覆盖这个方法来执行它们需要的任何初始化
+
+
+
+
+
+2.客户端请求（post形式）====》dispatcherServlet拦截===》调用父类FrameWorkServlet的service方法，根据不同的请求分发（分发过程调用父类HttpServlet的service方法，）
+			====》分发到FrameWorkServlet的doPost方法==》调用FrameWorkServlet的processRequest方法===》此方法做一些初始化环境准备
+			====》调用dispatcherServlet的doService方法
+					doService方法：1. Keep a snapshot of the request attributes in case of an include,在包含的情况下，保存请求属性的快照，
+								  to be able to restore the original attributes after the include //能够在include之后恢复原始属性
+							2.Make framework objects available to handlers and view objects 让处理程序和视图对象可用框架对象
+							
+							3.调用doDispatch方法
+								1.将请求转换为多部分请求，并使多部分解析器可用，如果没有设置多部分解析器，只需使用现存的请求
+									即判断是否为多部分请求，
+								2.为当前请求确定处理程序
+								
+								3.// Determine handler adapter for the current request.
+								4.进程最后修改的头，如果由处理程序支持

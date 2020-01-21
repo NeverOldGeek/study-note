@@ -1,0 +1,471 @@
+1T=1024G
+1P=1024T
+1E=1024P
+1Z=1024E
+1Y=1024Z
+1N=1024Y
+
+大数据解决两个问题
+-------------------------------
+	1.存储
+		分布式存储
+	2.计算
+		分布式计算
+
+分布式
+--------------------------------
+	由分布在不同主机上的进程协同在一起，才能构成整个应用
+
+B/S
+--------------------------------
+	Browser /http server：瘦客户
+云计算
+--------------------------------
+1.服务
+2.虚拟化
+
+常用词汇
+-----------------------------------
+	1.failure over		//容灾（一般只硬件上的错误）
+	2.falte over		//容错（一般只软件级的错误）
+
+大数据的四个特征
+------------------------
+	1.volume		//体量大
+	2.variety		//样式多
+	3.velocity		//速度快
+	4.valueless		//价值密度低
+
+hadoop四个模块
+------------------------------------
+	1.common
+	2.hdfs
+	3.hadoop yarn
+	4.hadoop MapReduce（MR）
+
+安装hadoop
+---------------------------------------
+	1.安装jdk
+		a)下载jdk-8u162-linux-x64.tar.gz
+		b)tar开
+			$>su centos; cd ~
+			$>mkdir downloads
+			$>cp /mnt/hdfs/windows_centos_sharedFolder/bigdata/jdk-8u162-linux-x64.tar.gz ~/downloads
+			$>tar -xzvf jdk-8u162-linux-x64.tar.gz
+		c)创建/soft文件夹
+			$>sudo mkdir /soft
+			$>sudo chown centos:centos /soft
+		d)移动tar开的文件夹到/soft/下
+			$>mv ~/downloads/jdk-1.8.0_162 /soft/
+		e)创建符号连接
+			$>ln -s /soft/jdk-1.8.0_162 /soft/jdk
+		f)验证jdk安装是否成功
+			$>cd /soft/jdk/bin
+			$>./java -version
+
+
+centos配置环境变量
+----------------------------------
+	1.编辑/etc/profile
+		$>sudo nano /etc/profile
+		...
+		export JAVA_HOME=/soft/jdk
+		export PATH=$PATH:$JAVA_HOME/bin
+	2.使环境变量即刻生效
+		$>source /etc/profile
+	3.进入任意目录下，测试是否OK
+		$>cd ~
+		$>java -version
+
+安装hadoop
+-----------------------------------
+	1.安装hadoop
+		a)下载hadoop-2.7.3.tar.gz
+		b)tar开
+			$>su centos; cd ~
+			$>cp /mnt/hdfs/windows_centos_sharedFolder/bigdata/hadoop-2.7.3.tar.gz ~/downloads
+			$>tar -xzvf hadoop-2.7.3.tar.gz
+		d)移动tar开的文件夹到/soft/下
+			$>mv ~/downloads/hadoop-2.7.3 /soft/
+		e)创建符号连接
+			$>ln -s /soft/hadoop-2.7.3 /soft/hadoop
+	2.配置hadoop环境变量
+		1.编辑/etc/profile
+			$>sudo nano /etc/profile
+			...
+			export JAVA_HOME=/soft/jdk
+			export HADOOP_HOME=/soft/hadoop
+			export PATH=$PATH:$JAVA_HOME/bin
+			export PATH=$PATH:$HADOOP_HOME/bin:$HADOOP_HOME/sbin
+		2.使环境变量即刻生效
+			$>source /etc/profile
+		3.进入任意目录下，测试是否OK
+			$>cd ~
+			$>hadoop version
+
+配置hadoop的三种模式
+---------------------------------------------
+	1.standalone(local)
+		do nothing!(刚配好就是本地模式)
+		不需要启动单独的hadoop进程
+	2.Pseudodistributed mode(伪分布模式)
+		等同于完全分布，只有一个节点
+		a)进入${HADOOP_HOME}/etc/hadoop/目录
+		b)编辑core-site.xml
+			<?xml version="1.0"?>
+			<configuration>
+				<property>
+					<name>fs.defaultFS</name>
+					<value>hdfs://localhost/</value>
+				</property>
+			</configuration>
+		c)编辑hdfs-site.xml
+			<?xml version="1.0"?>
+			<configuration>
+				<property>
+					<name>dfs.replication</name>
+					<value>1</value>
+				</property>
+			</configuration>
+		d)编辑mapred-site.xml
+			注意：先复制一份（cp mapred-site.xml.template mapred-site.xml）
+			<?xml version="1.0"?>
+			<configuration>
+				<property>
+					<name>mapreduce.framework.name</name>
+					<value>yarn</value>
+				</property>
+			</configuration>
+		e)编辑yarn-site.xml
+			<?xml version="1.0"?>
+			<configuration>
+				<property>
+					<name>yarn.resourcemanager.hostname</name>
+					<value>localhost</value>
+				</property>
+				<property>
+					<name>yarn.nodemanager.aux-services</name>
+					<value>mapreduce_shuffle</value>
+				</property>
+			</configuration>
+		f)配置SSH
+			1)检查是否安装了ssh相关软件包（openssh-server，openssh-clients，openssh）
+				$>yum list installed | grep ssh
+			2)检查是否成功启动了sshd进程
+				$>ps -Af | grep sshd
+			3)在client侧生成公私密钥对
+				$>ssh-keygen -t rsa -P '' -f ~/.ssh/id_rsa
+			4)生成的~/.ssh/文件夹，里面有id_rsa(私钥)，id_rsa.pub(公钥)
+			
+			5)追加公钥到~/.ssh/authorized_keys文件中(文件名和位置固定)(若有多台客户机想无密连接此服务器，只需将这些客户机生成的公钥也追加到authorized_keys文件中)
+				$>cd ~/.ssh
+				$>cat id_rsa.pub >> authorized_keys
+			6)修改authorized_keys的权限为644
+				$>chmod 644 authorized_keys
+			7)测试
+				$>ssh s201(如果没有修改主机名此处为localhost)
+
+	3.full distribute(完全分布式)
+
+让命令行提示符显示完整路径
+------------------------------
+	1.编辑profile文件，添加环境变量PS1
+		$>nano /etc/profile
+		  export PS1='[\u@\h `pwd`]\$'
+	2.source是修改立即生效（暂时在此会话生效，永久生效重启）
+		$>source /etc/profile
+		
+
+配置hadoop，使用符号连接的方式，让三种配置形态共存
+-------------------------------------------------
+	1.创建三个配置目录，内容等同于hadoop目录
+		${HADOOP_HOME}/etc/localmode	//还原改过的四个配置文件为原始状态
+		${HADOOP_HOME}/etc/pseudomode
+		${HADOOP_HOME}/etc/fullmode
+	2.创建符号连接
+		$>ln -s 以上三个目录之一 hadoop
+	2.5停止进程
+		$>stop-all.sh
+	3.对hdfs进行格式化(若报错，执行步骤4，后再格式化，不报错跳过步骤4)
+		$>hadoop namenode -format
+	4.修改hadoop配置文件，手动指定JAVA_HOME环境变量
+		$>nano ${HADOOP_HOME}/etc/hadoop/hadoop_env.sh
+		  ...
+		  export JAVA_HOME=/soft/jdk
+		  ...
+	5.启动hadoop的所有进程
+		$>start-all.sh
+		注意：若此时已修改主机名会报the authenticity of host 'localhost(127.0.0.1)' can't be established
+		解决办法：
+			方法1. $>ssh  -o StrictHostKeyChecking=no  192.168.98.201（linux系统上的ip）
+			方法2.	修改/etc/ssh/ssh_config文件（或$HOME/.ssh/config）中的配置，
+				添加如下两行配置：
+					StrictHostKeyChecking no
+					UserKnownHostsFile /dev/null
+				
+	6.启动完成后，出现以下进程
+		$>jps				//jps:查看所有java进程
+
+	7.查看hdfs文件系统
+		$>hdfs dfs -ls /
+	8.创建目录
+		$>hdfs dfs -mkdir -ls -p /user/centos/hadoop
+	9.通过webui查看hadoop的文件系统（浏览器访问需要关闭防火墙）
+		http://192.168.98.201(主机名):50070/
+	10.查看是否启用端口
+		$>netstat -ano | grep 50070
+	11.停止hadoop所有进程
+		$>stop-all.sh
+	12.centos防火墙操作
+		[centos6.5之前的版本]
+		$>sudo service firewalld stop		//停止服务
+		$>sudo service firewalld start		//启动服务
+		$>sudo service firewalld status		//查看状态
+
+		[centos7]
+		$>sudo systemctl enable firewalld.service	//启用
+		$>sudo systemctl disable firewalld.service	//禁用
+		$>sudo systemctl start firewalld.service	//启动
+		$>sudo systemctl stop firewalld.service		//停止
+		$>sudo systemctl status firewalld.service	//查看状态
+
+hadoop的端口
+---------------------------
+	50070		//namenode http port
+	50075		//datanode http port
+	50090		//secondarynamenode http port
+
+	8020		//namenode rpc port
+	50010		//datanode rpc port
+
+hadoop四大模块对应进程
+---------------------------------
+	common
+	hdfs		//namenode + datanode + secondarynamenode
+
+	mapred		
+	yarn		//resourcemanager + nodemanager
+
+启动进程脚本
+-----------------------------------
+	1.start-all.sh
+	2.stop-all.sh
+
+	3.start-dfs.sh
+		NN		//namenode
+		DN		//datanode
+		2NN		//secondarynamenode
+
+	4.start-yarn.sh
+		RM		//resourcemanager
+		NM		//namenodemanager
+
+修改主机名
+-----------------------------------------
+	1./etc/hostname
+		s201
+	2./etc/hosts
+		127.0.0.1 localhost
+		192.168.98.201 s201
+		192.168.98.202 s202
+		192.168.98.203 s203
+		192.168.98.204 s204
+
+完全分布式
+-----------------------------------------
+	1.克隆3台client(centos7)
+		右键centos7-->管理-->克隆-->...-->完整克隆
+	2.启用客户机共享文件夹，再启动client
+
+	3.修改hostname和ip地址文件
+		$>sudo nano /etc/hostname
+		   s202
+		$>sudo nano /etc/sysconfig/network-scripts/ifcfg-enoxxxxx
+		   ...
+		   IPADDR=192.168.98.202
+
+	4.重启网络服务
+		$>sudo service network restart
+	5.修改/etc/resolv.conf文件
+		$>sudo nano /etc/resolv.conf
+			...
+			nameserver 192.168.98.2
+	6.重复以上2-5过程
+
+
+准备完全分布式主机的ssh
+------------------------------------
+	1.删除所有主机上的/home/centos/.ssh/*
+		$>ssh s202 rm -rf /home/centos/.ssh/*
+	2.在s201主机上生成密钥对
+		$>ssh-keygen -t rsa -P '' -o ~/.ssh/id_rsa
+	3.将s201的公钥文件id_rsa.pub远程复制到s202~s204主机上
+		$>scp id_rsa.pub centos@s201:/home/centos/.ssh/authorized_keys
+		$>scp id_rsa.pub centos@s202:/home/centos/.ssh/authorized_keys
+		$>scp id_rsa.pub centos@s203:/home/centos/.ssh/authorized_keys
+		$>scp id_rsa.pub centos@s204:/home/centos/.ssh/authorized_keys
+		
+		注意：确保authorized_keys的权限为644
+		修改authorized_keys的权限为644
+				$>chmod 644 authorized_keys
+	4.配置完全分布式
+		a)进入${HADOOP_HOME}/etc/hadoop/目录
+		b)编辑core-site.xml
+			<?xml version="1.0"?>
+			<configuration>
+				<property>
+					<name>fs.defaultFS</name>
+					<value>hdfs://s201/</value>
+				</property>
+			</configuration>
+		c)编辑hdfs-site.xml
+			<?xml version="1.0"?>
+			<configuration>
+				<property>
+					<name>dfs.replication</name>
+					<value>3</value>
+				</property>
+			</configuration>
+		d)编辑mapred-site.xml
+			与伪分布式相同不变
+		e)编辑yarn-site.xml
+			<?xml version="1.0"?>
+			<configuration>
+				<property>
+					<name>yarn.resourcemanager.hostname</name>
+					<value>s201</value>
+				</property>
+				<property>
+					<name>yarn.nodemanager.aux-services</name>
+					<value>mapreduce_shuffle</value>
+				</property>
+			</configuration>
+		f)编辑slaves文件 [放数据节点]
+			清空然后加上
+			s202
+			s203
+			s204
+		g)修改hadoop-env.sh
+			hadoop的位置手动指定
+	5.分发配置
+		$>cd /soft/hadoop/etc
+		$>scp -r full centos@s202:/soft/hadoop/etc
+		$>scp -r full centos@s203:/soft/hadoop/etc
+		$>scp -r full centos@s204:/soft/hadoop/etc
+	6.删除符号连接
+		$>cd /soft/hadoop/etc
+		$>rm hadoop
+		$>ssh s202 rm /soft/hadoop/etc/hadoop
+		$>ssh s203 rm /soft/hadoop/etc/hadoop
+		$>ssh s204 rm /soft/hadoop/etc/hadoop
+		
+	7.重建符号连接
+		$>cd /soft/hadoop/etc
+		$>ln -s fullmode hadoop
+		$>ssh s202 ln -s /soft/hadoop/etc/fullmode /soft/hadoop/etc/hadoop
+		$>ssh s203 ln -s /soft/hadoop/etc/fullmode /soft/hadoop/etc/hadoop
+		$>ssh s204 ln -s /soft/hadoop/etc/fullmode /soft/hadoop/etc/hadoop
+	8.删除临时目录下的文件
+		$>cd /tmp
+		$>rm -rf *
+		$ssh s202 rm -rf /tmp/*
+		$ssh s203 rm -rf /tmp/*
+		$ssh s204 rm -rf /tmp/*
+	9.删除hadoop日志
+		$>cd /soft/hadoop/logs/
+		$>sudo rm -rf *
+		$>ssh s202 rm -rf /soft/hadoop/logs/*
+		$>ssh s203 rm -rf /soft/hadoop/logs/*
+		$>ssh s204 rm -rf /soft/hadoop/logs/*
+	10.格式化文件系统
+		在格式化之前记得要stop-all.sh,停掉进程
+			强制杀死进程
+			-----------------
+			$>kill -9 端口号
+		$>hadoop namenode -format
+	11.启动所有进程
+		$>start-all.sh
+	12.查看进程是否正确
+		s201
+			7633 ResourceManager
+			7985 Jps
+			7461 SecondaryNameNode
+			7303 NameNode
+		s202
+			5744 Jps
+			5570 NodeManager
+			5469 DataNode
+		s203
+			5744 Jps
+			5570 NodeManager
+			5469 DataNode
+		s204
+			5744 Jps
+			5570 NodeManager
+			5469 DataNode
+	13.通过webui查看hadoop的文件系统（浏览器访问需要关闭防火墙）
+		http://192.168.98.201(主机名):50070/
+		看datanode是否三个都启动
+
+将s201~s204之间的root用户也实现无密登录
+-----------------------------------------------
+	1.同上
+
+
+
+rsync
+----------------------
+	远程同步
+	rsync -lr /home/etc/a.txt centos@s202:/home/etc
+
+符号连接
+-------------------------
+	1.修改符号连接的owner
+		$>chown -h centos:centos xxx	//-h:针对连接本身，而不是所指文件
+
+	2.修改符号连接
+		$>ln -sfT index.html index	//覆盖原有的连接
+
+start-all.sh脚本分析
+----------------------------------------
+	sbin/start-all.sh
+	-----------------------
+		libexec/hadoop-config.sh
+		start-dfs.sh
+		start-yarn.sh
+	
+	sbin/start-dfs.sh
+	------------------------
+		libexec/hadoop-config.sh
+		sbin/hadoop-daemons.sh --config .. --hostname .. start namenode ...
+		sbin/hadoop-daemons.sh --config .. --hostname .. start datanode ...
+		sbin/hadoop-daemons.sh --config .. --hostname .. start secondarynamenode ...
+		sbin/hadoop-daemons.sh --config .. --hostname .. start zkfc ...
+		
+	sbin/start-yarn.sh
+	-------------------------------
+		libexec/hadoop-config.sh
+		bin/yarn-daemon.sh start resourcemanager
+		bin/yarn-daemons.sh start nodemanager
+
+	sbin/hadoop-daemons.sh
+		(eg:$>hadoop-daemons.sh start datanode)			//daemons启动多个
+		(eg:$>hadoop-daemons.sh stop datanode)			//daemons停止多个
+	-----------------------------
+		libexec/hadoop-config.sh
+		slaves
+		hadoop-daemon.sh
+
+	sbin/hadoop-daemon.sh
+		(eg:$>hadoop-daemon.sh start secondarynamenode)		//daemon启动单个
+		(eg:$>hadoop-daemon.sh stop secondarynamenode)		//daemon停止单个
+	-----------------------------------
+		libexec/hadoop-config.sh
+		bin/hdfs ....(参数)
+
+	sbin/yarn-daemon.sh
+	---------------------------
+		libexec/hadoop-config.sh
+		bin/yarn
+	
+	

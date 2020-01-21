@@ -1,0 +1,29 @@
+相对路径
+绝对路径：相对于磁盘的路径（通常使用相对路径）
+.   代表当前路径
+..  代表上一层目录（在操作系统中也是）
+
+frame，frameset  框架
+iframe 嵌入式框架
+
+fileset
+
+<input>
+属性：size，maxlength，disabled，readonly，value，style
+
+普通按钮，提交，图片，重置按钮
+em：字高
+
+html主要负责数据的收集和数据的展现
+
+优先级
+行内样式》
+作业：
+边框极细
+文本序号左对齐，单价右对齐
+
+css样式框模型
+
+text-overflow:
+
+命令：nginx-1.12.2>dir -s stop

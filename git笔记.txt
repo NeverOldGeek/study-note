@@ -1,0 +1,129 @@
+gerrit  
+	git config remote.origin.push refs/heads/*:refs/for/* 推送当前分支到refs/for/当前head所在的分支上。
+	scp -p -P 29418 gerrit.cloud.storm:hooks/commit-msg $(git rev-parse --git-dir)/hooks/ 从gerrit远程仓库，复制commit-msg文件
+
+
+
+创见版本库：
+	创建目录：mkdir learngit
+	进入目录learngit执行如下命令：git init
+	文件加入暂存区：git add test.txt
+	暂存区回退到工作区: git reset test.txt
+	提交到本地版本库：git commit -m “注释”
+	查看状态：git status
+版本间穿梭：
+	修改文件还没提交查看差异：git diff test.txt
+	查看暂存区文件与commit的差异 git diff --cached
+	查看历史记录：git log
+	查看时间线历史记录：git log --graph --pretty=oneline --abbrev-commit
+	版本回退：
+		git中HEAD表示当前版本，HEAD^表示上一个版本，HEAD^^表示上上个版本
+		当然往上100个版本写100个^比较容易数不过来，所以写成HEAD~100。
+
+		回退到上一个版本：git reset --hard HEAD^
+		回到指定的版本：git reset --hard 1094a(指定的提交版本号id部分)
+		记录每一次命令：git reflog
+	撤销修改：git checkout -- text.txt
+	删除文件：git rm -- text.txt
+远程仓库：
+	添加远程仓库：
+		首先远程github上已添加ssh的公钥，创建一个learngit仓库
+		本地创建一个同名的仓库
+		本地关联远程仓库：git remote add origin git@github.com:NeverOldGeek/learngit.git
+		本地内容推送到远程库： git push -u origin master（实际推送到远程的master分支，加-u将本地的master分支和远程的master分支关联起来）
+	从远程库克隆：git clone git@github.com:NeverOldGeek/learngit.git
+	
+git分支管理
+	1.创建与合并分支
+		创建分支:git branch dev
+		切换分支：git checkout dev
+		//创建并切换分支到dev：git checkout -b dev
+		查看当前分支：git branch （该命令列出所有分支，带*的表示当前分支）
+		查看远程分支：git branch -r 
+		合并分支（合并其他分支到当前分支）：git merge dev(如果输出带有Fast-forward信息，说明本次合并是"快进模式")
+		删除分支：git branch -d <name>
+	2.强制不允许使用Fast forward模式：git merge --no-ff -m "forbid to use Fast forward" dev
+	3.保存当前分支的工作区和暂存区状态git stash
+	4.查看存储状态的位置：git stash list
+	5.恢复存储的状态：git stash apply
+	  删除stash内容：git stash drop
+	  恢复存储状态并删除stash内容：git stash pop
+	  恢复指定的stahs状态：git stash apply stash@{0}
+	6.强行删除一个没有合并的分支
+	    git branch -D <name>
+		
+git fetch 有四种基本用法
+	1. git fetch            →→ 这将更新git remote 中所有的远程repo 所包含分支的最新commit-id, 将其记录到.git/FETCH_HEAD文件中
+	2. git fetch remote_repo         →→ 这将更新名称为remote_repo 的远程repo上的所有branch的最新commit-id，将其记录。 
+	3. git fetch remote_repo remote_branch_name        →→ 这将这将更新名称为remote_repo 的远程repo上的分支： remote_branch_name
+	4. git fetch remote_repo remote_branch_name:local_branch_name       →→ 这将这将更新名称为remote_repo 的远程repo上的分支： remote_branch_name ，并在本地创建local_branch_name 本地分支保存远端分支的所有数据。	
+	FETCH_HEAD： 是一个版本链接，记录在本地的一个文件中，指向着目前已经从远程仓库取下来的分支的末端版本。
+git pull 的运行过程：
+
+	git pull : 首先，基于本地的FETCH_HEAD记录，比对本地的FETCH_HEAD记录与远程仓库的版本号，然后git fetch 获得当前指向的远程分支的后续版本的数据，然后再利用git merge将其与本地的当前分支合并。
+ 
+多人协作：
+	1.查看远程库信息：git remote
+			  git remote -v (显示更加详细的信息)
+	2.远程创建dev分支：
+				首先：git branch dev 本地创建dev分支
+				推送到远程：git push origin dev  (本地分支和远程分支在git push 的时候可以随意指定，交错对应，只要不出现版本从图即可)
+	3.指定本地dev分支与远程origin/dev分支的链接：git branch --set-upstream-to=origin/dev dev
+	
+	
+	小结：
+		查看远程库信息，使用git remote -v；
+
+		本地新建的分支如果不推送到远程，对其他人就是不可见的；
+
+		从本地推送分支，使用git push origin branch-name，如果推送失败，先用git pull抓取远程的新提交；
+
+		在本地创建和远程分支对应的分支，使用git checkout -b branch-name origin/branch-name，本地和远程分支的名称最好一致；
+
+		建立本地分支和远程分支的关联，使用git branch --set-upstream branch-name origin/branch-name；
+
+		从远程抓取分支，使用git pull，如果有冲突，要先处理冲突。
+
+
+		 因此，多人协作的工作模式通常是这样：
+
+			1.首先，可以试图用git push origin <branch-name>推送自己的修改；
+
+			2.如果推送失败，则因为远程分支比你的本地更新，需要先用git pull试图合并；
+
+			3.如果合并有冲突，则解决冲突，并在本地提交；
+
+			4.没有冲突或者解决掉冲突后，再用git push origin <branch-name>推送就能成功！
+
+			5.如果git pull提示no tracking information，则说明本地分支和远程分支的链接关系没有创建，
+			   用命令git branch --set-upstream-to <branch-name> origin/<branch-name>
+			
+git的rebase操作：git rebase（将分叉的历史记录整理成一条直线）
+
+git 存储
+	git stash 存储未完成的工作状态
+	git stash list 
+	git stash apply stash@{i} 指定应有的存储，不指定默认取最近的
+
+标签管理：
+	发布一个版本时，我们通常先在版本库中打一个标签（tag），这样，就唯一确定了打标签时刻的版本。
+	将来无论什么时候，取某个标签的版本，就是把那个打标签的时刻的历史版本取出来。所以，标签也是版本库的一
+	个快照。
+	Git的标签虽然是版本库的快照，但其实它就是指向某个commit的指针（跟分支很像对不对？但是分支可以移动，
+	标签不能移动），所以，创建和删除标签都是瞬间完成的
+
+	创建标签：1.切换到要打标签的分支上：git branch dev
+		  2.创建：git tag <name> eg:git tag v1.2
+	查看所有标签：git tag
+	给指定的commitid打标签：git tag v0.9 f52c633
+				git tag -a v0.1 -m "version 0.1 released" 1094adb
+	查看标签说明：git show <tagname>
+
+	删除标签：git tag -d <tagname>
+
+	推送本地标签到远程：git push origin <tagname>
+	
+	一次推送所有未推送到远程的标签：git push origin --tags
+
+	删除已推送到远程的标签：1.删除本地标签：git tag -d v1.2
+				2.删除远程：git push origin :refs/tags/v1.2

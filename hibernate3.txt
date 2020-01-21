@@ -1,0 +1,346 @@
+一.如何搭建hibernate环境
+
+	1、创建java项目
+
+	2、创建User Library，加入依赖包
+		* HIBERNATE_HOME/lib/*.jar
+		* HIBERNATE_HOME/hibernate3.jar
+		* 加入数据库驱动（mysql驱动）
+		
+	3、提供hibernate.cfg.xml文件，完成基本的配置
+		
+	4、建立实体类User.java
+
+	5、提供User.hbm.xml文件，完成实体类的映射
+
+	6、将User.hbm.xml文件加入到hibernate.cfg.xml文件中
+
+	7、编写工具类ExoprtDB.java,将hbm生成ddl，也就是hbm2ddl
+
+	8、建立客户端类Client，添加用户数据到mysql
+
+	最好加入如下配置项，方便观察hibernate sql的生成：
+		<property name="hibernate.show_sql">true</property>
+		<property name="hibernate.format_sql">true</property>
+		
+	最好加入log4j配置文件，将该配置文件拷贝到src下，便于程序的调试
+
+二.junit简介：
+	* 编写测试类XXTest，需要继承TestCase
+	* 编写单元测试方法，方法名称必须为test开头，方法没有参数没有返回值，采用public修饰
+	
+	* 最好采用单独的目录存放测试程序
+	* 建议使用断言
+	
+	掌握HIbernate的CRUD操作
+
+	必须掌握get和load方法的差别？
+		* get不支持lazy，load在默认情况下支持lazy
+		* get加载数据，如果不存在返回null，而load返回ObjectNotFoundException异常
+		
+	Transeint
+		* 没有被session管理
+		* 在数据库中没有与之匹配的记录
+		
+	Persistent
+		* 纳入session管理
+		* 在数据库中有与之匹配的记录
+		* 当属性发生改变，在清理缓存时（脏数据检查）会自动和数据库同步
+		
+	Detached
+		* 没有被session管理
+		* 在数据库中存在与之匹配的记录
+		
+	Session是一个持久化管理器		
+
+	简单了解hql
+
+三。session flush测试：
+	session flush方法主要做了两件事：
+		* 清理缓存
+		* 执行sql
+		
+	session在什么情况下执行flush
+		* 默认在事务提交时
+		* 显示的调用flush
+		* 在执行查询前，如：iterate
+		
+	hibernate按照save(insert),update、delete顺序提交相关操作	
+		
+
+四.hibernate基本映射
+	实体类---表，采用<class>标签映射
+	实体类中的普通属性（不包括集合、自定义类和数组）---表字段，采用<property>标签映射
+
+	注意：如果实体类的名称或实体类中属性的名称和数据库关键字重复，将会出现问题
+	   可以考虑采用table属性和column属性对其进行重新命名
+
+	实体类的设计原则：
+		* 实现无参的默认的构造函数
+		* 提供一个标识
+		* 建议不要使用final修饰实体类
+		* 建议为实体类生成getter和setter方法
+
+	主要了解如下主键生成策略：
+		* identity
+		* sequence
+		* uuid
+		* native
+		* assigned
+		* foreign
+		  
+	了解hibernate.cfg.xml文件中的hbm2ddl属性
+		通过<property name="hibernate.hbm2ddl.auto">update</property>标签生成的表
+		默认使用的charset=latin1
+		
+		若建表之前建库时指定了字符集为utf-8，那么建表时也会用utf-8.
+
+五、hibernate多对一关联映射
+
+	关联映射，就是将关联关系映射到数据库中，所谓的关联关系
+	在对象模型中就是一个或多个引用
+
+	多对一关联映射原理：在多的一端加入一个外键，指向一的一端
+
+	在多的一端采用如下标签映射：
+		<many-to-one name="group" column="groupid"/>
+		
+	掌握级联的含义？
+		* 级联是对象之间的连锁操作，它只影响添加、删除和修改
+
+六、hibernate一对一主键单向关联映射（单向关联Person----->IdCard）
+
+	一对一关联映射原理：让两个实体的主键一样，这样就不需要加入多余的字段了
+
+	<class name="com.bjpowernode.hibernate.Person" table="t_person">
+		<id name="id">
+			<!-- 采用foreign生成策略，forgeign会取得关联对象的标识 -->
+			<generator class="foreign">
+				<!-- property只关联对象 -->
+				<param name="property">idCard</param>
+			</generator>
+		</id>
+		<property name="name"/>
+		<!-- 
+			one-to-one指示hibernate如何加载其关联对象，默认根据主键加载
+			也就是拿到关系字段值，根据对端的主键来加载关联对象
+		
+			constrained="true表示，当前主键(person的主键)还是一个外键
+			参照了对端的主键（IdCard的主键），也就是会生成外键约束语句
+		 -->
+		<one-to-one name="idCard" constrained="true"/>
+	</class>	
+七、hibernate一对一主键关联映射（双向关联Person<----->IdCard）
+
+	需要在IdCard加入<one-to-one>标签，指示hibernate将关联对象Person
+	根据主键加载上来
+
+	<one-to-one>不影响存储，只影响加载
+
+八、hibernate一对一唯一外键关联映射（单向关联Person----->IdCard）
+	一对一唯一外键关联映射其实是多对一的特例
+
+	采用<many-to-one>标签来映射，指定多的一端unique为true，这样就限制了多的一端的多重性
+	为一，就是这样来映射的。
+
+九、hibernate一对一唯一外键关联映射（双向关联Person<----->IdCard）
+
+	一对一唯一外键关联双向采用<one-to-one>标签映射，必须指定<one-to-one>
+	标签中的property-ref属性为关系字段的名称
+
+十、hibernate一对多关联映射（单向Classes--->Student）
+
+	一对多关联映射和多对一关联映射映射原理是一致的，都是在多的一端加入一个外键，指向一的一端
+
+	它们的区别在于维护的关系不同：
+		* 多对一维护的关系是：多指向一的关系，有了此关系，在加载多的时候可以将一加载上来
+		* 一对多维护的关系是：一指向多的关系，有了此关系，在加载一的时候可以将多加载上来
+		
+	在一一端维护关系存在缺陷：
+		* 因为多的一端Student不知道Classes的存在（也就是Student没有维护与Classes的关系）
+		所以在保存Student的时候关系字段classesid是为null的，如果将该关系字段设置为非空，则
+		将无法保存数据
+		* 另外因为Student不维护关系，而Classes维护关系，Classes就会发出多余的update语句，保证
+		Classes和Student有关系，这样加载Classes的时候才可以把该Classes对应的学生加载上来
+
+十一、hibernate一对多关联映射（双向Classes<--->Student）
+
+	采用一对多双向关联映射的目的主要是为了主要是为了解决一对多单向关联的缺陷
+	而不是需求驱动的
+
+	一对多双向关联的映射方式：
+		* 在一的一端的集合上采用<key>标签，在多的一端加入一个外键
+		* 在多的一端采用<many-to-one>标签
+		
+	！！！注意：<key>标签和<many-to-one>标签加入的字段保持一直，否则会产生数据混乱
+
+	inverse属性：
+		* inverse属性可以用在一对多和多对多双向关联上，inverse属性默认为false，为
+		false表示本端可以维护关系，如果inverse为true，则本端不能维护关系，会交给另一端
+		维护关系，本端失效。
+		
+		所以一对多关联映射我们通常在多的一端维护关系，让一的一端失效，所以设置为inverse为true
+		
+	inverse和cascade
+		* inverse是控制方向上的反转，只影响存储
+		* cascade是操作上的连锁反映
+
+十二、hibernate多对多关联映射（单向User--->Role）
+
+	具体映射：
+	<set name="roles" table="t_user_role">
+		<key column="user_id"/>
+		<many-to-many class="com.bjpowernode.hibernate.Role" column="role_id"/>	
+	</set>
+
+十三、hibernate多对多关联映射（双向User--->Role）
+
+	映射方法：
+		<set name="users" table="t_user_role">
+			<key column="role_id" not-null="true"/>
+			<many-to-many class="com.bjpowernode.hibernate.User" column="user_id"/>
+		</set>
+
+	需要注意：
+		* 生成的中间表名称必须一样
+		* 生成的中间表中的字段必须一样
+继承映射：
+十四、每棵类继承树一张表
+
+	因为类继承树肯定是对应多个类，要把多个类的信息存放在一张表中，
+	必须有某种机制来区分哪些记录是属于哪个类的。这种机制就是，在表中添加一个字段，
+	用这个字段的值来进行区分。用hibernate实现这种策略的时候，有如下步骤：
+	父类用普通的<class>标签定义
+	在父类中定义一个discriminator，即指定这个区分的字段的名称和类型
+	如：<discriminator column=”XXX” type=”string”/>
+	子类使用<subclass>标签定义，在定义subclass的时候，需要注意如下几点：
+	Subclass标签的name属性是子类的全路径名
+	在Subclass标签中，用discriminator-value属性来标明本子类的discriminator字段
+	（用来区分不同类的字段）的值Subclass标签，既可以被class标签所包含（这种包含关系
+	正是表明了类之间的继承关系），也可以与class标签平行。 当subclass标签的定义与class
+	标签平行的时候，需要在subclass标签中，添加extends属性，里面的值是父类的全路径名称。
+	子类的其它属性，像普通类一样，定义在subclass标签的内部。
+
+	关于鉴别值在存储的时候hibernate会自动存储，在加载的时候会根据鉴别值取得相关的对象
+
+	get和hql支持多态查询
+	load在lazy设置为false的情况下支持多态查询
+
+	多态查询：hibernate在加载数据的时候，能够采用instancof鉴别出其真正的类型
+
+十五、每个类一张表
+
+	这种策略是使用joined-subclass标签来定义子类的。父类、子类，每个类都对应一张数据库表。
+	在父类对应的数据库表中，实际上会存储所有的记录，包括父类和子类的记录；在子类对应的数据库表中，
+	这个表只定义了子类中所特有的属性映射的字段。子类与父类，通过相同的主键值来关联。
+	实现这种策略的时候，有如下步骤：
+	父类用普通的<class>标签定义即可
+	父类不再需要定义discriminator字段
+	子类用<joined-subclass>标签定义，在定义joined-subclass的时候，需要注意如下几点：
+	Joined-subclass标签的name属性是子类的全路径名
+	Joined-subclass标签需要包含一个key标签，这个标签指定了子类和父类之间是通过哪个字段来关联的。
+	如：<key column=”PARENT_KEY_ID”/>，这里的column，实际上就是父类的主键对应的映射字段名称。
+	Joined-subclass标签，既可以被class标签所包含（这种包含关系正是表明了类之间的继承关系），
+	也可以与class标签平行。 当Joined-subclass标签的定义与class标签平行的时候，
+	需要在Joined-subclass标签中，添加extends属性，里面的值是父类的全路径名称。
+	子类的其它属性，像普通类一样，定义在joined-subclass标签的内部。
+					
+十六、每个具体类一张表
+
+	这种策略是使用union-subclass标签来定义子类的。每个子类对应一张表，而且这个表的信息是完备的，
+	即包含了所有从父类继承下来的属性映射的字段（这就是它跟joined-subclass的不同之处，
+	joined-subclass定义的子类的表，只包含子类特有属性映射的字段）。实现这种策略的时候，有如下步骤：
+	父类用普通<class>标签定义即可
+	子类用<union-subclass>标签定义，在定义union-subclass的时候，需要注意如下几点：
+	Union-subclass标签不再需要包含key标签（与joined-subclass不同）
+	Union-subclass标签，既可以被class标签所包含（这种包含关系正是表明了类之间的继承关系），
+	也可以与class标签平行。 当Union-subclass标签的定义与class标签平行的时候，需要在Union-subclass标签中，
+	添加extends属性，里面的值是父类的全路径名称。
+	子类的其它属性，像普通类一样，定义在Union-subclass标签的内部。这个时候，虽然在union-subclass
+	里面定义的只有子类的属性，但是因为它继承了父类，所以，不需要定义其它的属性，在映射到数据库表的时候，
+	依然包含了父类的所有属性的映射字段。
+
+	！！！注意：在保存对象的时候id不能重复（不能使用数据库的自增方式生成主键）
+
+十七、复合（联合）主键映射：
+
+	通常做法是将主键相关字段放到一个单独的类中，这样类是有要求的：
+		* 必须实现序列化接口
+		* 覆盖equals和hashcode方法
+			
+十八、Component映射
+
+	在hibernate中Component映射采用<component>标签即可
+
+	Component是某个实体的逻辑组成部分，它与实体类的主要差别在于，它没有oid
+	Component在DDD中成为值类
+
+	采用Component的好处：实现对象模型的细粒度划分，复用率高，含义明确，层次分明
+
+	对象模型与关系模型的设计恰恰相反，对象模型一般是细粒度的，关系模型一般是粗粒度的
+
+十九、集合映射
+	完成set、list、array、map的映射
+
+二十、hibernate查询语言hql
+
+在hql中关键字不区分大小写，通常小写，类的名称和属性名称必须区分大小写
+
+
+	1、简单属性查询【重要】
+		* 单一属性查询，返会属性结果集列表，元素类型和实体类中相应的类型一致
+		* 多个属性查询，多个属性查询返会对象数组，对象数组的长度取决于属性的个数
+		  对象数组中元素的类型取决于属性在实体类中的类型
+		* 如果认为返会数组不够对象化，可以使用hql动态实例化Student对象
+		参见：SimplePropertyQueryTest.java
+		   
+	2、实体对象查询【重要】
+	    * N + 1问题，就是发出了N+1条sql语句
+	    1：首先发出查询对象id列表的语句
+	    N：根据id到缓存中查询，如果缓存中不存在与之匹配的数据，那么会根据id发出相应的sql语句
+	    
+	    *list和iterate的区别？
+	     list： 默认情况下list每次都会发出sql语句，list会将数据放到缓存中，而不利用缓存
+	     iterate：默认情况下iterate利用缓存，如果缓存中不存在会出现N+1问题
+		参见：SimpleObjectQueryTest1.java,SimpleObjectQueryTest2.java     
+		 
+	3、条件查询【重要】
+		* 可以采用拼字符串的方式传递参数
+		* 可以采用 ？来传递参数（索引从0开始）
+		* 可以采用 :参数名 来传递参数
+		* 如果传递多个参数，可以采用setParamterList方法
+		* 在hql中可以使用数据库的函数，如：date_format
+		参见：SimpleConditionQueryTest.java
+		
+	4、hibernate直接使用sql语句查询
+		参见：SqlQueryTest.java
+		
+	5、外置命名查询
+	    * 在映射文件中使用<query>标签来定义hql
+	    * 在程序中使用session.getNamedQuery()方法得到hql查询串
+	    参见：NameQueryTest.java,Student.hbm.xml
+	    
+	6、查询过滤器
+		* 在映射文件中定义过滤器参数
+		* 在类的映射中使用过滤器参数
+		* 在程序中必须显示的启用过滤器，并且为过滤器参数赋值
+		参见：FilterQueryTest.java,Student.hbm.xml
+		
+	7、分页查询【重要】
+		* setFirstResult(),从0开始
+		* setMaxResults(),每页显示的记录数
+		参见：PageQueryTest.java
+		
+	8、对象导航查询【重要】
+		参见：ObjectNavQueryTest.java
+		
+	9、连接查询【重要】
+		* 内连接
+		* 外连接（左连接/右连接）
+		参见：JoinQueryTest.java
+		
+	10、统计查询【重要】
+		参见：StatQueryTest.java
+		
+	11、DML风格的操作（尽量少用，因为和缓存不同步）	
+		参见：DMLQueryTest.java

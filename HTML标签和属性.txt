@@ -1,0 +1,115 @@
+对标签							属性		
+<head></head>头
+<title></title>头标题
+<h1></h1>1号标题
+<center>水平居中对齐（html5不支持）
+<body></body>文本内容
+<a></a>	超链接						href = ""，target（_blank,_self,_parent,_top）
+<p></p>段落					
+<pre></pre>预排版编译允许保留在源代码中输入的空格和回车
+<b></b>加粗
+<hr></hr>水平线						align,size,width,color等
+<marquee></marquee>					direction,behavior,height,width,hspace(左右边框宽度)vspace			
+<ul>
+   <li>星期一
+   <li>星期二
+   <li>星期三
+</ul>   	无序清单
+<ol></ol>	有序清单
+<table></table>表格
+<tr></tr>定义行
+<td></tr>定义列						rowspan，colspan
+<frameset></frameset>（代表整个框架，出现<frameset>标记的文档，将不再使用body标记）
+<frame></frame>
+<iframe></iframe>浮动窗口				width,height,scrolling,frameborder
+<fieldset></fieldset>分组标签
+<legend>为分组标签设置标题，必须放在<fieldset>标签最前面
+<bgsound>设置背景音乐(只适用于IE浏览器)			src,loop
+<embed>用来插入各种多媒体				src,autostart,hidden,loop,width,height
+<form></form>表单					name,action,method
+<text></text>						readonly,size,maxlength,value
+<textarea></textarea>文本域
+<password></password>
+<radio></radio>
+<checkbox></checkbox>
+按钮的四种类型：button,submit(提交按钮)，reset(重置按钮),image(图片按钮)
+<select></select>下拉框
+<option></option>
+
+
+
+单标签
+<img>图片						src,width,height,alt
+<input>							type,name,value,size
+
+
+
+
+CSS样式选择器
+基本语法：规则选择器 {属性：值； 属性：值......}
+类选择器：
+<style type = "text/css">
+.名字{属性：值；...}
+</style>
+ID选择器：
+<style type = "text/css">
+#名字{属性：值；...}
+</style>
+标签选择器：
+<style type = "text/css">
+标签名{属性：值；...}
+</style>
+样式选择器得分类：
+文本样式（属性）
+font-size(字体大小)，font-family(字体类型)，font-style（字体样式），color（设置或检索字体颜色）
+vetical-align 文本垂直对齐方式，text-align(文本水平对齐方式)
+
+超链接样式属性
+a:link（正常状态下的链接样式），a:hover(鼠标滑入链接时的样式)
+a:active(按下链接但不松开时的样式) a:visited(访问过的链接样式)
+text-decoration(none,underline,overline)
+
+背景样式属性
+background-color
+background-image
+cursor
+
+框样式属性
+margin(top,right,bottom,left)
+bordr-style,border-width,border-color
+padding(top,right,bottom,left)
+
+CSS定位机制
+流布局
+浏览器自动将所有元素按出现的顺序出现
+
+绝对定位
+{
+position：absolute;
+left
+top
+z-index
+display
+border
+}以网页坐标系为基准定位
+
+相对定位
+{
+position:relative;
+left
+top
+z-index
+display
+border
+}相对本来正常的位置定位
+只有使用了定位的元素才能使用x-index属性
+
+层在网页中是一种容器<span></span><div></div>层很少单独使用(属性)，一般结合CSS使用
+display(block,none)
+visibility:hidden
+overflow(scroll,hidden)
+
+事件
+onclick(单击事件)
+onmouseover(鼠标滑入事件)
+onmouseout(鼠标划出事件)

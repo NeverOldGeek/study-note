@@ -1,0 +1,16 @@
+dump
+	--out 输出位置
+	docker exec -it 233612a0a85a mongodump -u root -p example -d QiXiangJu-TianQi-MingXi -c FileEvent --authenticationDatabase admin --archive=QiXiangJuTianQi201911.dump
+	docker exec -it 233612a0a85a mongodump -u root -p example -d QiXiangJu-TianQi-MingXi -c FileEvent --authenticationDatabase admin --out=/data/db/QiXiangJuTianQi-FileEvent.bson
+restore命令
+	--nsInclude='transactions.*' 指定恢复时包含的表	
+	--nsTo 
+	docker run -it --rm -v /home/brh:/data/configdb reg.scp.com/library/mongo:4.2-bionic mongorestore --host 172.36.12.6 --port 27017 -u jkr3 -p jkinfo --authenticationDatabase=admin --archive=/data/configdb/QiXiangJuTianQi201911.dump
+	docker run -it --rm -v /home/brh:/data/configdb reg.scp.com/library/mongo:4.2-bionic mongorestore --host 172.36.12.6 --port 27017 -u jkr3 -p jkinfo --authenticationDatabase=admin -d QiXiangJu-TianQi-MingXi /data/configdb/QiXiangJuTianQi201911bson/QiXiangJuTianQi/to201911.bson
+	mongorestore -d BoJi-BoLiMuQiang-YiChangJianZhuQingDan C:\Users\1\Desktop\BoLiMuQiangYiChangJianZhuQingDan.bson
+
+mongoimport
+	docker run -it --rm -v /home/brh:/data/configdb reg.scp.com/library/mongo:4.2-bionic mongoimport --host 172.36.12.6 --port 27017 -u jkr3 -p jkinfo --type=csv --headerline --columnsHaveTypes --authenticationDatabase=admin --db=WuLianGanZhi -c=metadata_device_info --file=/data/configdb/deviceInfo_201912271517.csv
+	mongoimport --host 192.168.120.188 --port 37017 -u root -p example --type=csv --headerline --columnsHaveTypes --authenticationDatabase=admin --db=ZhuJianWei-ChuanGanQi-MingXi -c=info --file=C:\Users\1\Desktop/putuo-device-21-update.csv
+mongo实列
+mongod --port 37017 --dbpath D:\mongodb4.0.12\repldata --replSet rs0 --auth

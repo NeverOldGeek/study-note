@@ -1,0 +1,234 @@
+﻿可参考：https://www.yiibai.com/postgresql/postgresql-view.html
+
+dos命令（windows）导入sql脚本：psql -h localhost -d postgres -U robot -f createdb.sql
+
+1.PostgreSQL对表名、字段名都是区分大小写的。在图形化界面可以正常新建。用SQL语句的时候需要加双引号，如果jdbc查询等处，记得使用转义符号。
+2.PostgreSQL在SQL语句中对大小写是不敏感的
+3.psql两种分页方式:
+		1.SELECT * FROM test_table WHERE i_id>1000 limit 100;
+		2.SELECT * FROM test_table  limit 100 OFFSET 1000;
+			对于大数据量的检索分页第一种远远快于第二种
+一、连接pgsql
+	1.配置好pgsql的环境变量可通过普通终端连接（dos）
+	2.通过自带的sql shell（psql）终端工具连接
+	3.通过安装自带的pgadmin图形化工具连接
+	连接方法：
+		1.通过sql shell
+			Server：想要进行连接的已经安装了PostgreSQL的主机；
+			Database：想要进行操作的数据库；
+			Port：端口，默认为5432；
+			Username：设定好的用户名；
+			Password：用户名对应的密码。
+			输入了正确的相关信息后，则会进入到psql命令行操作界面。
+		2.通过普通终端连接
+			1、 将psql添加到PATH路径：要想在终端环境下使用psql，首
+				先要将psql添加到系统的PATH路径中，这样在终端界面下才
+				能识别psql这个命令。方法是在UNIX环境下，使用以下命令
+				:export PATH=/Library/PostgreSQL/10/bin:$PATH相应的
+				路径名要根据你自己安装的版本号来进行更改。之后就能在
+				终端中敲入psql命令了。
+				
+			2	连接到数据库：在终端中输入以下命令，来连接到PostgreSQL
+				数据库，相应的参数和前面描述的sql shell方法是一样的，
+				psql -h Server -p Port -U Username DatabaseName其中“-h”是
+				指定想要连接的主机，如果是本机的话就是localhost，“-p”是端口号，
+				“-U”是用户名，“DatabaseName”是要进行操作的数据库名称。如果主
+				机就是在本机上，可以直接输入以下的更为简单的命令，只需指定用
+				户名：psql -U Username输入正确的参数之后，就能在终端界面上进
+				行psql的命令行界面，进行相应的操作。
+			3.从Postgresql 9.2开始，还可以使用URI格式进行连接：
+				psql postgresql://myuser:mypasswd@myhost:5432/mydb
+		3.图形化界面：略
+二.常用的psql命令
+		1、访问本地postgres数据库：
+			# su – postgres #切换至postgres用户
+		   # psql  #直接访问，默认进入本地postgres数据库
+		2、访问指定的数据库：
+		# su – postgres #切换至postgres用户
+		   # psql huangxifeng #直接访问本地huangxifeng数据库
+		3、访问远程数据库
+			# psql -h 172.16.254.21 -p 5432 -U postgres –d huangxifeng
+		查看数据库字典表pg_stat_activity可以知道有什么用户在访问，访 问什么库以及访问的进程
+		
+	\l：列出所有的数据库；
+	\du: 列出psql的所有用户；
+	\c DatabaseName：切换数据库；
+	\c - username: 切换用户
+	\dt：连接进入到某个数据库后，使用此命令查看数据库中的所有表；
+	\d TableName：查看某个表的描述，此命令可以用来查看某个表中的列元素和相应的数据类型；
+	\e：打开psql内置的文本编辑器，可以方便的编写脚本。如果需要输入的SQL语句很多，直接在命令行界面上编写
+		会很不方便，这时可以用\e打开内置的编辑器，这个编辑器使用了Vim环境，用这个Vim文本编辑器编写SQL脚本
+		会很方便，保存之后退出，就能自动运行刚才在编辑器中保存的SQL命令，并返回结果；如果需要对刚执行的SQ
+		L命令进行修改，可以再次使用\e打开编辑器，里面的内容仍然是上一次保存的文本；
+	\q：退出psql。
+	\di 查看索引 
+	-a
+		--echo-all
+			在读取行时向标准输出打印所有内容。 这个选项在脚本处理时比交互模式时更有用。这个选项等效于设置变量 ECHO 为 all。 
+	\i filename
+		从文件filename中读取并把其内容当作从键盘输入的那样执行查询。
+		注意: 如果你想在屏幕上看到读入的行，你必须对所有行设置变量 ECHO 为 all。
+	psql --help 查看psql命令的帮助
+	
+	创建新的用户及密码
+	CREATE USER robot WITH PASSWORD '1234qwer' superuser;
+	
+三.数据库的创建
+	CREATE DATABASE name
+		[ [ WITH ] [ OWNER [=] user_name]
+			   [ TEMPLATE [=] template]
+			   [ ENCODING [=] encoding]
+			   [ LC_COLLATE [=] lc_collate]
+			   [ LC_CTYPE [=] lc_ctype]
+			   [ TABLESPACE [=] tablespace_name]
+			   [ CONNECTION LIMIT[=] connlimit ] ]
+	其中方括号内的都是为可选的参数，换句话说创建一个数据库的语法可是是这样：
+	Create database database_name;
+	那么参数都是为默认的，Owner就是当前的用户，template是template1，encoding是template1的编码，LC_COLLATE，LC_CTYPE，TABLESPACE，CONNECTIONLIMIT与template1的配置保持一致。
+		PostgreSql数据库中默认存在两个模板template0，template1，其实template0是templat1的一个克隆，在安装完数据库后默认存在的，创建数据库时不一定要使用这两个模板中的一个，可以使别的数据库。如存在一个数据库test需要创建数据库testdb，并且以test为模板，那么这个时候test数据不能有任何连接。
+	下面对参数进行解释：
+	OWNER：表示拥有者，一般都是创建者；
+	TEMPLATE：表示创建数据库的模板；
+	ENCODING：表示新创建的数据库的字符集，如'SQL_ASCII'，LATIN1;
+	LC_COLLATE: 表示字符串排序规则，如collate‘C’或者’de_DE’，’es_ES’；
+	LC_CTYPE：一般与LC_COLLATE保持一致，指的是字符分类；
+	TABLESPACE：表示新建的数据库在那个表空间，默认为default；
+	Connection LImIT:表示并发的连接数；
+	需要注意的是
+	1、  在创建数据库时需要超级用户；
+	2、  并发连接数只是一个近似的值，并不是精确的，比如100个连接，已经使用99个，那么此时两个连接需要连接，此时很可能两个连接都失败，当然如果是超级用户的话是不受这个限制的；
+	3、  TABLESPACE是另外创建的，如：
+	Create tablespace tablespace_name  LOCATION  ‘C:/data’;
+	4、  特别注意的是template参数指的是需要创建的数据库的模板，真实创建时只是先克隆这个template，如果模板数据库存在数据比如表中存在数据，存在索引等，那么ENCODING，LC_COLLATE，LC_CTYPE三个参数需要你保持一致，因为不一致可能会由于编码字符集不匹配而导致乱码等问题；
+	5、  在创建数据库或者数据库表空间时都不能再一个事务快中(cannot be executed inside a transaction block)；
+	6、  可以在命令行中执行createdb命令来创建数据库，-O就是拥有者，-l相当于lc-collateand --lc-ctype，-T就是指定模板，-E指的是字符集，dbname指的是数据库名；
+	7、  创建数据库例子：
+	Create database testdb1 owner=postgres
+					   template= template1      
+					 ENCODING = 'UTF8'
+					 LC_COLLATE='Chinese(Simplified)_People''s RepublicofChina.936'
+					 LC_CTYPE = 'Chinese (Simplified)_People''sRepublic of China.936'
+						 CONNECTION LIMIT = 1000;
+						 
+四.表的ddl语言
+	1.创建表
+	create table t1(id int,name varchar,s1 char,s2 serial,s3 bytea);
+	2.表上增加/删除字段
+	alter table t1 add column last_update_time timestamp without time zone;
+	alter table t1 drop column last_update_time;
+	增加非空字段,并且设置默认值
+	alter table tx add column ostime timestamp not null default 'now()';
+	还可以一条命令多次alter操作(不仅仅是增加删除字段),这样只需要扫描一次表,大大提升效率
+	alter table t1 drop column if exists last_update_time ,add column s5 bigint;
+	alter table t1 add column s6 int,drop column if exists s4;
+	对于删除字段,如果字段上有其它对象(例如其它表的外键)会导致alter table被拒绝,这时需要添加cascade选项
+	alter table t1 drop column s1 cascade;
+	3.修改字段类型
+	对于相同类型类的字段,可以直接进行修改,例如将int改成bigint或者decimal等,但是不能直接修改某些其它类型,例如date
+	alter table t2 alter column id type decimal(10,2); 
+	如果某些不同类型的字段,则需要进行强制转换,例如将varchar转换为int
+	alter table t2 alter column id type int using id::int;
+	alter table t2 alter column id type date using id::date;
+	using子句可以包含更复杂的表达式,用来将数据进行转换.例如可以截取字段等.下面的将字段进行转换:
+	alter table ty alter column name type varchar(20) using substr(name::varchar(5),1,2);
+	4.修改字段非空/默认值
+	设置默认值
+	alter table t2 alter column id set default 'now()';
+	删除默认值
+	alter table tx alter column ostime drop default;
+	设置非空
+	alter table tx alter column ostime set not null;
+	删除非空
+	alter table tx alter column ostime drop not null;
+	5.修改表名
+	alter table ty rename to tk;
+	6.将表移动到其它schema中
+	alter table tx set schema test;
+	7.将表移动到其它表空间中
+	grant all on tablespace new_tablespace to brent;--首先需要有表空间的权限
+	alter table tx set tablespace new_tablespace;
+	移动表后,索引不会自动移动,因此还需要手工移动索引
+	alter index idx_tx set tablespace new_tablespace;
+	
+	8.postgresql截断表：truncate table tablename;
+	PostgreSQL TRUNCATE TABLE命令用于从现有表中删除完整的数据。您也可以使用
+	DROP TABLE命令删除完整的表，但会从数据库中删除完整的表结构，如果希望存储
+	某些数据，则需要重新创建此表。
+	它和在每个表上使用DELETE语句具有相同的效果，但由于实际上并不扫描表，所以
+	它的速度更快。 此外，它会立即回收磁盘空间，而不需要后续的VACUUM操作。 这在
+	大表上是最有用的。
+		
+五.psql的模式（schema）
+	一个数据库包含一个或多个模式，而模式又包含表、序列、函数等，不同的模式可以包含相同名称
+	的表、序列、函数等。模式本质上是命名空间，就像人的姓氏一样。一个用户只要有权限，连接到
+	数据库后，可一次访问该数据库的任何模式下的对象。新建一个数据库会默认创建一个public模式
+	，后续操作数据库对象如果没指定模式，则默认为public。例如之前创建的school数据库。模式不能嵌套。
+	
+	语法：参考：https://www.cnblogs.com/oneTOinf/p/8458166.html
+六.psql序列的创建语法（psql的自增需要用到序列）
+	eg：create sequence student_id_seq 
+			increment by 1
+			start with 1
+			minvalue 1
+			no maxvalue
+			cache 1;
+		alter table student alter column id set default nextval('student_id_seq');
+		
+	在插入数据时：eg：insert into student values(nextval('student_id_seq'),'张三',24);
+	
+	
+七。psql函数
+		语法：
+		CREATE [OR REPLACE] FUNCTION function_name (arguments)   
+		RETURNS return_datatype AS $variable_name$  
+		  DECLARE  
+			declaration;  
+			[...]  
+		  BEGIN  
+			< function_body >  
+			[...]  
+			RETURN { variable_name | value }  
+		  END; LANGUAGE plpgsql;
+		参数说明：
+		function_name：指定函数的名称。
+		[OR REPLACE]：是可选的，它允许您修改/替换现有函数。
+		RETURN：它指定要从函数返回的数据类型。它可以是基础，复合或域类型，或者也可以引用表列的类型。
+		function_body：function_body包含可执行部分。
+		plpgsql：它指定实现该函数的语言的名称。
+		
+		eg:
+		CREATE OR REPLACE FUNCTION totalRecords ()  
+		RETURNS integer AS $total$  
+		declare  
+			total integer;  
+		BEGIN  
+		   SELECT count(*) into total FROM student;  
+		   RETURN total;  
+		END;  
+		$total$ LANGUAGE plpgsql;
+		
+八.psql触发器
+	1.创建触发器函数：
+		CREATE OR REPLACE FUNCTION 函数() RETURNS TRIGGER AS $body$  
+			BEGIN  
+				要执行的语句 
+				RETURN NEW/OLD;   
+			END;  
+		$body$  
+		LANGUAGE plpgsql;
+
+	2.触发器部分： 
+		CREATE TRIGGER trigger_name 
+		AFTER INSERT 
+		ON table_name 
+		FOR EACH ROW 
+		EXECUTE PROCEDURE 函数()
+
+		虽然看起来很简单，但是用起来一开始还是很懵逼，但是只要搞清楚两点就很容易操作了： 
+		1、NEW表示是你插入的数据， 
+		比如：当你在user_follow表中插入了一行数据（表示谁关注了谁这件事）我们要在user表中更新一下某个user的follow_number这一值，NEW.user_follow_id 表示你插入的那行的user_follow_id这一列的值。 
+		因为我们要用这个值去user表中找到user的id。所以这个时候得用NEW，一般可以说NEW用在insert或update的时候。 
+		2.相反，OLD是你插入数据前表里已经存在的数据。 
+		比如：当你在user_follow表中删除了一行数据（表示谁取消关注了谁这件事），user的关注的人数当然也得减少一个。这个时候当我们做删除操作的时候，我们得用删除的这一行中的user_id去user表中找id对吧~ 
+		所以，我们这个时候用的是以前的表里已经有的内容 
+		，用OLD.xxx来表示就行了。

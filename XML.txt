@@ -1,0 +1,244 @@
+XML语法
+
+1.文档声明：<?xml version="1.0" encoding="utf-8"?> 
+	1.1encoding属性声明文本的编码格式
+	注意：用记事本写XML文件即使声明了编码格式为utf-8码，也可能打不开，比如你在
+		XML中写了中文“中国”这个记事本内容存到硬盘里时是默认通过当前window系统
+		默认编码，假设此时通过gb2312将“中国”转换成二进制代码存入硬盘中，当IE解析
+		当前文件时由于你声明通过utf-8解析，所以此时用utf-8码解析通过gb2312码存入的
+		“中国”有可能解析失败
+		解决办法：保存文件时 另存为 选择保存编码格式为utf-8码
+	1.2 standalone属性说明文档是否独立
+		<?xml version="1.0" encoding="utf-8" standalone="yes"?> 
+2.XML元素（即XML文件中出现的标签）
+	1.1有开始标签和结束标签
+		1.1有标签体：<a>www.itcastcn</a>
+		1.2不包含标签体<a></a>,简写为：<a/>
+	1.2一个标签可以嵌套若干个子标签，但绝不允许交叉嵌套
+		
+	1.3好的XML文档必须有且只有一个根标签，其他都是他的子孙标签
+
+	1.4XML标签中出现的所有空格和换行，XML解析程序都会当做标签内容进行处理
+
+	1.5XML元素命名规范 
+		区分大小写
+		不能以数字或下划线开头
+		不能以xml（XML,Xml等开头）
+		不能包含空格
+		名称中间不能包含（:）冒号
+3 属性
+	1.1一个标签可以有多个属性，属性值一定要有双引号（""）或('')单引号 引起来
+
+	1.2定义属性必须遵循与标签同样的命名规范
+
+	1.3在xml中标签属性所代表的信息也可以被改成子元素的形式来描述
+		eg：<input name="rensheng"></input>
+				等价于
+			<input>
+				<name>rensheng</name>
+			</input>
+4.XML中注释
+		格式：<!--注释-->
+
+		注意：
+			1.XML文档声明前绝对不能有注释
+			2.注释不能嵌套使用
+
+5.CData区（character data）
+	放在CDATA区域的内容，XML解析程序不会处理，而是原封不动的输出
+
+	1.2语法：
+		<![CDATA[
+			标签体
+		]]>
+
+6.转义字符
+	特殊字符		替代字符
+	  &			   &amp;
+	  <			   &lt;
+	  >			   &gt;
+	  "			   &quot;
+	  '			   &apos;
+7.处理指令
+	1.1处理指令用来指挥解析引擎如何解析XML文档内容
+		处理指令必须以"<?"开头，以"?>"作为结尾
+		XML声明就是最常见的一种处理指令
+
+XML约束
+ 	1.1在XML技术里，可以编写一个文档来约束一个XML文档的书写规范
+
+	1.2常用的约束技术
+		XML DTD
+		XML Schema
+
+	2.1 DTD约束
+		1.引用DTD约束
+			XML文件中使用DOCTYPE声明语句来指明它所遵循的DTD文件
+			
+			DOCTYPE的两种声明方式
+				1.引用文件在本地时
+					<!DOCTYPE 文档根节点 SYSTEM "DTD文件的URL">
+						eg:<!DOCTYPE 书架 SYSTEM "book.dtd">
+				2.引用的文件是一个公共的文件时
+					<!DOCTYPE 文档根节点 PUBLIC "DTD名称" "DTD文件的URL"
+
+		2.DTD约束语法
+			DTD元素定义
+				<!ELEMENT 元素名称 元素类型>
+					注
+					   元素类型可以是内容或类型
+					   当元素类型表示内容时有()括起来
+					   当表示类型是直接写
+
+					常用的元素类型：
+						EMPTIY  定义一个空类型
+						ANY     表示元素内容可以是任意类型
+					类型为内容时的规范：
+						用逗号分隔，表示元素出现的顺序必须与声明时一致
+						用|分割，表示任选其一，即多个只能出现一个
+							
+						在元素内容中也可以使用+ * ? 等表示元素出现的次数
+							+	表示出现一次或多次
+							*	表示出现0次或多次
+							？	表示出现0次或一次
+		
+						可以使用圆括号批量设置例如：
+							<!ELEMENT MYFILE ((TITLE*,HEAD?,BODY)*|COMMENT)>
+			DTD属性定义
+				<!ATTLIST 元素名
+					属性名1 属性类型1 设置说明
+					属性名2 属性类型2 设置说明
+					......
+				>
+					eg:
+					<!ATTLIST 商品
+						类别 CDATA #REQURIED
+						颜色 CDATA #IMPLIED
+
+					常用属性值类型：
+						CDATA		表示属性值为普通文本字符串
+						ENUMERATED	枚举
+						ID		ID唯一不能重复，ID不能以数字开头（注HTML中标签的ID属性同样不能以数字开头）
+						ENTITY		实体
+					实体定义：
+						(实体用于为一段内容创建一个别名，以后再XML文档中就可以使用别名引用这段内容了)
+						1.引用实体
+							语法格式：
+								<!ENTITY 实体名称 "实体内容">
+							引用方式
+								&实体名称;
+							eg:<!ENTITY language "I am a good boy">
+						 	  ......
+						   	  &language;
+						2.参数实体（给DTD文档自身用的）
+							语法格式：
+								<!ENTITY % 实体名称 "实体内容">
+							引用方式
+								%实体名称;
+
+					设置说明：
+						#REQURIED   必须设置该属性
+						#IMPLIED    该属性可设置也可不设置
+						#FIXED	    说明该属性取值为固定一个值，在XML文件中不能为该属性设置其他值
+								但必须为该属性设置给定的值，不能为空
+						默认值	    在属性定义时设置说明给了默认值，而在XML文档中若没有设置该值则使用默认值
+					
+			DTD实体约束
+
+
+
+XML编程：
+	dom编程和sax编程的区别：
+	dom:将整个xml文档封装到document对象中，将每一个标签也封装成对象，并记录各节点元素之间的关系，这些对象都是Node的子类
+		优点：使用dom解析xml文档，实现crud特别方便，操作速度比较快
+		缺点：如果文件较大时，对内存的消耗就特别大，极容易导致内存溢出
+
+	sax：查找哪行解析哪行	
+	1.解析速度快，对内存占用少，查找数据特别方便
+ 
+	2.只适合查找数据，不适合做增删改操作
+	杂记：java虚拟机默认最大可以管理64M内存，怎样修改最大的内存
+		修改：启动时以对话框形式打开vm参数添加xmx100M
+
+jaxpAPI:
+1.使用jaxp进行dom解析
+	DocumentBuilderFactory类用于创建DOM模式的解析器对象（抽象）
+		1.获取工厂
+			DocumentBuilderFactory factory = DocumentBuilderFactory.newInstance
+		2.产生解析器
+			DocumentBuilder builder = factory.newDocumentBuilder();
+		3.解析xml文档，得到代表文档的document
+			Document document = builder.parse(new File(path));
+
+		查找：略
+		
+		修改：DocumentBuilderFactory factory = DocumentBuilderFactory.newInstance();
+			DocumentBuilder builder = factory.newDocumentBuilder();
+			Document document = builder.parse(new File("path"));
+
+			document.getElementsByTagName("售价").item(0);
+			price.setTextContent("fjla");//只是修改document内存中的值
+				想修改xml文件中的值还要将修改后的document重新写入xml文件中
+
+			TransformerFactory tf = TransformerFactory.newInstance();
+			//得到转换器
+			Transformer ts = tf.newTransformer();
+			ts.transform(new DOMSource(document), new StreamResult(new File("src/book.xml")));
+
+2.使用jaxp进行sax解析
+	SAX采用事件处理的方式解析xml文件，需要两部分：解析器和处理器
+		1.获取SAXParserFactory
+			SAXParserFactory sp = SAXParserFactory.newInstance();
+		2.通过解析工厂获取解析器
+			SAXParser ss = sp.newSAXParser()
+		3.通过解析器获取xml读取器
+			XMLReader xmlReader = ss.getXMLReaser();
+		4.设置读取器的事件处理对象
+			xmlReader.setContentHandler(new BookParserHandler());
+		5.解析XML文件
+			xmlReader.parse("book.xml");
+		
+	设置事件处理对象
+		写一个自己的处理器实现ContentHandler,然后实现它的所有方法但一般我们只用到
+		startElement，endElement,characters,然后在方法中写你想干的事。或者继承DefaultHandler
+		也能实现想要的结果
+		
+		获取属性
+			在处理器的startElement中传递的参数封装了这个元素的所有属性
+	SAX解析一般只用来用来读取xml
+
+3.使用jdom进行解析
+	1.获取解析器
+		SAXBuilder sb = new SAXBuilder();
+	2.关联要解析的xml对象
+		Document doc = sb.build(new FileInputStreaam(new File("myFile.xml")));
+
+	修改
+		XMLOutputter xmlOutputter = new XMLOutputter(Format.getPrettyFormat());
+		xmlOutputter.output(doc, System.out);
+		
+		FileWriter writer = new FileWriter("myFile.xml");
+		xmlOutputter.output(doc, writer);
+		writer.close();
+
+
+4.使dom4j进行解析
+	SAXReader reader = new SAXReader();
+	document = reader.read(new File("src/book1.xml"));
+	dom4j不用xpath只能一层一层的获取节点，想要向指定节点中插入元素，先获取
+	节点集合，然后向节点集合指定位置添加元素，最后将更新的内存写入xml中
+	
+	写入xml为了防止乱码最好用字节输出流
+	OutputFormat format = OutputFormat.createPrettyPrint();
+	format.setEncoding("utf-8");
+	XMLWriter writer = new XMLWriter(new FileOutputStream("src/com/gump/xmljaxp/class2.xml"),format);
+	writer.write(doc);
+	writer.close();
+
+
+Schema约束
+	1.一个XML Schema文档也必须有一个根结点，但这个根结点的名称为Schema。
+	2.编写了一个XML Schema约束文档后，通常需要把这个文件中声明的元素绑定到一个ＵＲＩ地址
+	  上，在XML Schema技术中有一个专业术语来描述这个过程，即把XML Schema文档声明的元素绑
+	   定到一个名称空间上，以后XML文件就可以通过这个URI（即名称空间）来告诉解析引擎，xml
+	   文档中编写的元素来自哪里，被谁约束。

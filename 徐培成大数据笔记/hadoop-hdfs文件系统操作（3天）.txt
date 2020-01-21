@@ -1,0 +1,283 @@
+hadoop的文件系统是逻辑上的
+
+bin/hadoop
+---------------------------------------
+	hadoop    fs                   (文件系统客户端)run a generic filesystem user client
+	hadoop    version              print the version
+	hadoop    jar <jar>            run a jar file
+			       note: please use "yarn jar" to launch
+				     YARN applications, not this command.
+	hadoop    checknative [-a|-h]  check native hadoop and compression libraries availability
+	hadoop    distcp <srcurl> <desturl> copy file or directories recursively
+	hadoop    archive -archiveName NAME -p <parent path> <src>* <dest> create a hadoop archive
+	hadoop    classpath            prints the class path needed to get the
+	hadoop    credential           interact with credential providers
+			       Hadoop jar and the required libraries
+	hadoop    daemonlog            get/set the log level for each daemon
+	hadoop    trace                view and modify Hadoop tracing settings
+
+bin/hdfs
+-------------------------------
+	  dfs                  (等价于hadoop fs)run a filesystem command on the file systems supported in Hadoop.
+	  classpath            prints the classpath
+	  namenode -format     format the DFS filesystem
+	  secondarynamenode    run the DFS secondary namenode
+	  namenode             run the DFS namenode
+	  journalnode          run the DFS journalnode
+	  zkfc                 run the ZK Failover Controller daemon
+	  datanode             run a DFS datanode
+	  dfsadmin             run a DFS admin client
+	  haadmin              run a DFS HA admin client
+	  fsck                 run a DFS filesystem checking utility
+	  balancer             run a cluster balancing utility
+	  jmxget               get JMX exported values from NameNode or DataNode.
+	  mover                run a utility to move block replicas across
+			       storage types
+	  oiv                  apply the offline fsimage viewer to an fsimage
+	  oiv_legacy           apply the offline fsimage viewer to an legacy fsimage
+	  oev                  apply the offline edits viewer to an edits file
+	  fetchdt              fetch a delegation token from the NameNode
+	  getconf              get config values from configuration
+	  groups               get the groups which users belong to
+	  snapshotDiff         diff two snapshots of a directory or diff the
+			       current directory contents with a snapshot
+	  lsSnapshottableDir   list all snapshottable dirs owned by the current user
+							Use -help to see options
+	  portmap              run a portmap service
+	  nfs3                 run an NFS version 3 gateway
+	  cacheadmin           configure the HDFS cache
+	  crypto               configure HDFS encryption zones
+	  storagepolicies      list/get/set block storage policies
+	  version              print the version
+
+hdfs常用命令
+	名称节点只存储块的信息，
+----------------------------
+	$>hdfs dfs -mkdir /user/centos/hadoop
+	$>hdfs dfs -ls -r /user/centos/hadoop
+	$>hdfs dfs -lsr /user/centos/hadoop
+	$>hdfs dfs -put index.html /user/centos/hadoop
+	$>hdfs dfs -get /user/centos /hadoop/index.html a.txt
+	$>hdfs dfs -rm -r -f /user/centos/hadoop
+
+hdfs
+----------------------------
+	切割
+
+	寻址时间：10ms
+	磁盘速率：100M / s
+	datanode是按块存储的（128M 原因：要使磁盘的寻址时间要占文件的读取时间的1%）
+HA
+------------------------
+	high availability 高可用性，通常用几个9衡量
+	99.999%
+SPOF:
+---------------------
+	single point of failure	//单点故障
+
+本地模式
+-------------------
+	[core-site.xml]
+	fs.defaultFS=file:///		//默认值
+
+配置hadoop临时目录
+------------------------------
+	1.配置[core-site.xml]
+		hadoop.tmp.dkr=/home/centos/hadoop
+
+		//以下属性均由hadoop.tmp.dkr决定
+		dfs.namenode.name.dir=file://${hadoop.tmp.dir}/dfs/name
+		dfs.datanode.data.dir=file://${hadoop.tmp.dir}/dfs/data
+		dfs.datanode.data.dir=file://${hadoop.tmp.dir}/dfs/data
+
+		dfs.namenode.checkpoint.dir=file://${hadoop.tmp.dir}/dfs/namesecondary
+	2.分发core-site.xml文件到s202,s203,s204
+		$>xsync.sh /soft/hadoop/etc/hadoop/core-site.xml
+	3.格式化文件系统，只对namenode的本地目录进行初始化
+		$>hdfs namenode -format		//等价于hadoop namenode -format
+
+	4.启动hadoop
+		$>start-dfs.sh
+
+在centos桌面版中安装eclipse
+-----------------------------------
+	1.下载eclipse
+
+
+使用hadoop客户端api访问hdfs
+-----------------------------------
+	1.创建java项目
+	2.导入hadoop类库
+
+
+
+
+配置hadoop的最小blocksize，必须是512的倍数
+---------------------------------------------------
+	[hdfs-site.xml]
+	difs.namenode.fs-limits.min-block-size=1024
+	大小必须是512的倍数，因为write，进行校验，512字节进行一次校验
+
+单独配置辅助名称节点
+--------------------------------
+	[hdfs-site.xml]
+	dfs.namenode.secondary.http-address=s206:50090
+
+使用oiv命令查看
+---------------------------
+	hdfs oiv -i fsimage -o a.xml -p XML		//查看镜像文件
+
+
+hdfs dfsadmin管理命令
+-------------------------
+	$>hdfs dfsadmin				//查看帮助
+	$>hdfs dfsadmin -help rollEdits		//查看指定命令的帮助
+	$>hdfs dfsadmin -rollEdits		//滚动编辑日志
+	
+	启动hdfs时，镜像文件编辑日志进行融合，编辑日志滚动
+
+	查看hdfs是否在安全模式
+	------------------------------------
+		$>hdfs dfsadmin -safemode enter		//进入
+		$>hdfs dfsadmin -safemode get		//查看
+		$>hdfs dfsadmin -safemode leave		//退出
+		$>hdfs dfsadmin -safemode wait		//等待
+
+	保存名称空间，需要进入安全模式
+	--------------------------------------
+		$>hdfs dfsadmin -saveNamespace
+
+	配额管理（quota）
+	-----------------------
+		[目录配额]
+		计算目录下的所有文件的总个数，如果是1表示空目录
+		$>hdfs dfsadmin -setQuota 1 dir1 dir2	//设置目录配额
+		$>hdfs dfsadmin -clrQuota  dir1 dir2	//消除配额管理
+
+		[空间配额]
+		计算目录下的所有文件的总大小，包括副本数
+		空间配额至少消耗384M的空间大小（目录本身会占用384M的空间）
+		$>hdfs dfsadmin -setSpaceQuota 3 data
+		$>echo -n a > kk.txt
+		$>hdfs dfs -put kk.txt data
+		$>hdfs dfs -clrSpaceQuota dir1
+
+快照管理
+----------------------
+	1.描述
+		迅速对文件或文件夹进行备份。不产生新文件，使用差值存储
+	默认是禁用快照
+	2.命令
+		$>hdfs dfsadmin -allowSnapshot		//在dir1启用快照
+		$>hdfs dfsadmin -disallowSnapshot	//在dir1关闭快照
+		$>hdfs dfs -createSnapshot dir ss1	//dir：要创建快照的目录
+							   ss1：生成的快照名
+		$>hdfs dfs -renameSnapshot dir ss1 ss2	//重命名快照
+		$>hdfs dfs deleteSnapshot dir ss1	//删除快照
+	
+
+黑白名单的组合情况
+include			//dfs.include.txt
+exclude			//dfs.hosts.exclude.txt
+这两个文件只需要驻留在名称节点所在客户机，不需要分发到数据节点客户机
+-------------------------------
+include		exclude		InterPretation
+No		No		不能连接
+No		Yes		不能连接
+Yes		No		可以连接
+Yes		Yes		可以连接，将会退役状态。
+
+节点的服役和退役[hdfs]
+-------------------------
+	[添加新节点]
+	1.在dfs.include文件中包含新节点名称，该文件在nn的本地目录
+		[白名单]
+		[s201:/soft/hadoop/etc/dfs.include.txt]
+			s202
+			s203
+			s204
+			s205
+	2.在hdfs-site.xml文件中添加属性
+		<property>
+			<name>dfs.hosts</name>
+			<value>/soft/hadoop/etc/dfs.include.txt</value>
+		</property>
+	3.在nn上刷新节点
+		$>hdfs dfsadmin -refreshNodes
+	4.在slaves文件中添加新节点ip[主机名]
+		s202
+		s203
+		s204
+		s205
+	5.单独启动新的节点中的datanode
+		[换到s205主机上]
+		$>hadoop-daemon.sh start datanode
+
+	[退役]
+	1.添加退役节点的ip到黑名单,不要更新白名单
+		[/soft/hadoop/etc/dfs.hosts.exclude.xtx]
+			s205
+	2.配置hdfs-site.xml文件中添加属性
+		<property>
+			<name>dfs.hosts.exclude</name>
+			<value>/soft/hadoop/etc/dfs.hosts.exclude.txt</value>
+		</property>
+	3.刷新nn（名称节点）
+		$>hdfs dfsadmin -refreshNodes
+	4.查看webui，节点状态decommisstion in progress
+
+	5.当所有的要退役节点都报告为Decommissioned,数据转移工作已经完成
+
+	6.从白名单删除节点，并刷新节点
+		[s201:/soft/hadoop/etc/dfs.include.txt]
+		$>hdfs dfsadmin -refreshNodes
+	7.从slaves中删除退役节点
+
+节点的服役和退役[yarn]
+-------------------------
+	[添加新节点]
+	1.在dfs.include文件中包含新节点名称，该文件在nn的本地目录
+		[白名单]
+		[s201:/soft/hadoop/etc/yarn.include.txt]
+			s202
+			s203
+			s204
+			s205
+	2.在hdfs-site.xml文件中添加属性
+		<property>
+			<name>yarn.resourcemanager.nodes.include-path</name>
+			<value>/soft/hadoop/etc/dfs.include.txt</value>
+		</property>
+	3.在nn上刷新节点
+		$>yarn rmadmin -refreshNodes
+	4.在slaves文件中添加新节点ip[主机名]
+		s202
+		s203
+		s204
+		s205
+	5.单独启动新的节点中的datanode
+		[换到s205主机上]
+		$>yarn-daemon.sh start datanode
+
+	[退役]
+	1.添加退役节点的ip到黑名单,不要更新白名单
+		[/soft/hadoop/etc/dfs.hosts.exclude.xtx]
+			s205
+	2.配置hdfs-site.xml文件中添加属性
+		<property>
+			<name>yarn.resourcemanager.nodes.exclude-path</name>
+			<value>/soft/hadoop/etc/dfs.hosts.exclude.txt</value>
+		</property>
+	3.刷新nn（名称节点）
+		$>hdfs dfsadmin -refreshNodes
+	4.查看webui，节点状态decommisstion in progress
+
+	5.当所有的要退役节点都报告为Decommissioned,数据转移工作已经完成
+
+	6.从白名单删除节点，并刷新节点
+		[s201:/soft/hadoop/etc/dfs.include.txt]
+		$>yarn rmadmin -refreshNodes
+	7.从slaves中删除退役节点
+
+
+
